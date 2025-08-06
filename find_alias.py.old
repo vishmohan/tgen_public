@@ -1,0 +1,105 @@
+#! /usr/bin/env python3
+
+#BTB2 hashes:
+#btb2 tag hash = pc[53:40]^pc[39:26]^pc[25:12]
+#btb2 address hash = pc[11:4]^pc[19:12]^pc[27:20]
+
+#BTB hashes:
+#btb tag hash = 		pc[48:36] ^ pc[35:23]^pc[22:10]
+#btb address hash = pc[9:5]^ pc[14:10] ^ pc[19:15]
+
+import sys
+
+btb_ub_lb_tag  = [(48,36),(35,23),(22,10)]
+btb_ub_lb_addr = [(9,5),(14,10),(19,15)]
+
+btb2_ub_lb_tag  = [(53,40),(39,26),(25,12)]
+btb2_ub_lb_addr = [(11,4),(19,12),(27,20)]
+
+alias_list_l1btb = []
+alias_list_l2btb = []
+
+def find_other_pcs(orig_pc,xor_value,l1btb=True,l2btb=False):
+	pc_alias = 0
+	howmany = 8
+	if l1btb:
+		for pc1 in range(howmany):
+			pc2 = pc1 ^ xor_value
+			pc_outofrange = extract_bits(orig_pc,63,49) #out of range of l1btb hash
+			pc_hi = extract_bits(orig_pc,48,36)
+			pc_lo = extract_bits(orig_pc,9,0)
+			pc2   = extract_bits(extend_pc(pc2), 12,0)
+			pc1   = extract_bits(extend_pc(pc1), 12,0)
+			pc_alias = pc_outofrange + pc_hi + f"{pc2}" + f"{pc1}" + pc_lo
+			alias_list_l1btb.append(pc_alias)
+
+	if l2btb:
+		for pc1 in range(howmany):
+			pc2 = pc1 ^ xor_value
+			pc_outofrange = extract_bits(orig_pc,63,54) #out of range of l2btb hash
+			pc_hi = extract_bits(orig_pc,53,40)
+			pc_lo = extract_bits(orig_pc,11,0)
+			pc2   = extract_bits(extend_pc(pc2), 13,0)
+			pc1   = extract_bits(extend_pc(pc1), 13,0)
+			pc_alias = pc_outofrange + pc_hi + f"{pc2}" + f"{pc1}" + pc_lo
+			alias_list_l2btb.append(pc_alias)
+
+def compute_xor(pc0,pc1,pc2):
+	''' for simplicity compute hash for the lower two pieces 
+			and keep the upper bits constant 
+			hash for l1btb here is computed based on 35:23,22:10 (48:36 is constant)
+			the find_other_pcs keeps 48:36 constant
+	'''
+	val0 = int(pc0,2)
+	val1 = int(pc1,2)
+	val2 = int(pc2,2)
+	#return val0 ^ val1 ^ val2
+	return  val1 ^ val2
+
+def extract_bits(pc,ub,lb):
+	ub_mod = 63-ub
+	lb_mod = 63-lb
+	pc_ub_lb = pc[ub_mod:lb_mod+1]
+	return pc_ub_lb
+
+def extend_pc(pc):
+	pc_bin = f"{pc:b}"
+	mlen = len(pc_bin)
+	full_pc_bin = pc_bin
+	if mlen!=64:
+		full_pc_bin = "0" * (64-mlen) + pc_bin
+	return full_pc_bin
+
+
+
+def main():
+	pc = int(sys.argv[1],16)
+	fullpc = extend_pc(pc)
+	pc0 = extract_bits(fullpc,48,36)
+	pc1 = extract_bits(fullpc,35,23)
+	pc2 = extract_bits(fullpc,22,10)
+	value_of_xor = compute_xor(pc0,pc1,pc2) 
+	print(f"value of hash for l1btb {hex(pc)} is {hex(value_of_xor)}")
+	find_other_pcs(fullpc,value_of_xor,True,False) #for l1btb alias
+
+	
+#btb2_ub_lb_tag  = [(53,40),(39,26),(25,12)]
+	pc0 = extract_bits(fullpc,53,40)
+	pc1 = extract_bits(fullpc,39,26)
+	pc2 = extract_bits(fullpc,25,12)
+	value_of_xor = compute_xor(pc0,pc1,pc2) 
+	print(f"value of hash for l2btb {hex(pc)} is {hex(value_of_xor)}")
+	find_other_pcs(fullpc,value_of_xor,False,True) #for l2btb alias
+
+	print(f"original pc: {hex(pc)}")
+	for alias in alias_list_l1btb:
+		pc_alias = int(alias,2)
+		print(f"alias pc (l1btb): {hex(pc_alias)}")
+	print("--------------------------------")
+	for alias in alias_list_l2btb:
+		pc_alias = int(alias,2)
+		print(f"alias pc (l2btb): {hex(pc_alias)}")
+
+
+if __name__ == "__main__":
+	main()
