@@ -5,6 +5,7 @@ import subprocess
 import gen_test
 import gen_linker
 import gen_opt
+import os
 
 def getargs():
 	options, remainder = getopt.getopt(sys.argv[1:],'',['count=','threads='])
@@ -29,11 +30,17 @@ def main():
 	lstr = ""
 	lfname = "test_" + p + ".list"
 	create_dir = f"mkdir {fullpath}"
-	create_symlink = f"ln -s  {fullpath} latest"
+	symlink_name = "latest"
+	create_symlink = f"ln -s  {fullpath} {symlink_name}"
+	remove_symlink = f"unlink {symlink_name}"
 	st, op = subprocess.getstatusoutput(create_dir)
 	if st:
 		print("Error creating directory")
 		sys.exit(1)
+	if os.path.exists(f"{symlink_name}"):
+		st1, op1 = subprocess.getstatusoutput(remove_symlink)
+		if not st1:
+			print(f"removed sysmlink {symlink_name}")
 	st, op = subprocess.getstatusoutput(create_symlink)
 	if st:
 		print("Error creating symlink")
