@@ -14,13 +14,23 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads=1):
 	optname_mt = fname + "_mt.opt"
 	mt_num_threads = num_threads if num_threads > 1 else 4
 
+	#myconfig_st = random.choice(["rv64_release_qh","rv64_alp5100","rv64_alp5200"]) #for ST
 	myconfig_st = random.choice(["rv64_release_qh"]) #for ST
+	myconfig_st = random.choice(["rv64_alp5100"]) #for ST
+
+
 
 	config_str = 'RV64_VA_SIZE=57,RV_BUILD_SVADU=True'#,RV_BTB2_ENABLE=1'
-	config_str_mt = f'RV64_VA_SIZE=57,RV_BTB2_ENABLE=1,AXI_ASYNC_OUTPUTS=False,NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SVADU=True'
+	config_str_mt = f'RV64_VA_SIZE=57,NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SVADU=True'
 	way_predictor = random.choice(["True","False"])
 	ifu_prefetch = random.choice(["True","False"])
-	config_str_mt += f',RV_BUILD_AFFINITY_REGISTER=False,RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
+	#config_str_mt += f',RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
+
+	myconfig_mt = "rv64_alp1200_mt"
+	mt_ooo = True
+	if mt_ooo:
+		myconfig_mt = "rv64_qh_perf_mt"
+		config_str_mt = f'RV64_VA_SIZE=57,NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39'
 	
 	#btb ovrd params
 	rv_btb2_enable = 1 
@@ -70,6 +80,8 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads=1):
 		-arch rv64
 		-march rv64gcv_zbs
 		-config {myconfig_st}
+		-config_shasta {myconfig_st}
+		-config_turlock turlock_aia
 		-config_ovr_shasta "{config_str}"
 		-maxinstr 550000
 		-ld_file {lsrc}
@@ -83,7 +95,7 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads=1):
 		-test {src}
 		-arch rv64
 		-march rv64gcv_zbs
-		-config rv64_alp1200_mt
+		-config {myconfig_mt}
 		-config_ovr_shasta "{config_str_mt}"
 		-config_turlock turlock_mt
 		-bench_dec_num_threads {mt_num_threads}

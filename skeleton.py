@@ -34,6 +34,7 @@ def get_skeleton():
 	templates.append("rv64_sv57_512g_6.s")
 	templates.append("rv64_sv57_512g_7.s")
 	templates.append("rv64_sv57_512g_svadu.s")
+	templates.append("rv64_sv57_512g_svadu_vs.s")
 	mname = random.choice(templates)
 	mstr = ""
 	parse_skeleton(mname) #populate sections and their bases in the segments dictionary

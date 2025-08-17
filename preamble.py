@@ -9,15 +9,23 @@ mstr = '''
 .equ SV48_PAGING_MODE, 	0x9
 .equ SV39_PAGING_MODE, 	0x8
 
-.equ SATP_PPN, 	0x140000 #4K aligned satp.ppn
-.equ SATP_ASID, 0xffff
-.equ SATP_MODE, SV57_PAGING_MODE
+.equ SATP_PPN, 	 0x140000 #4K aligned satp.ppn
+.equ SATP_ASID,  0xffff
+.equ VSATP_ASID, 0xfffe
+.equ VSATP_PPN,  0x140008 #4K aligned vsatp.ppn
+.equ SATP_MODE,  SV57_PAGING_MODE
+.equ VSATP_MODE, SV57_PAGING_MODE
+
+.equ HGATP_PPN, 	 0x140010 #16K aligned satp.ppn
+.equ HGATP_VMID,   1
+.equ HGATP_MODE,   SV57_PAGING_MODE
 
 .equ BIT_MSTATUS_MPP_LO, 11
 .equ BIT_MSTATUS_MPP_HI, 12
 .equ BIT_MSTATUS_MPRV, 	 17
 .equ BIT_MSTATUS_SUM, 	 18
 .equ BIT_MSTATUS_MXR, 	 19
+.equ BIT_MSTATUS_MPV, 	 39
 
 .equ	BIT_MFC0_ICACHE_FLUSH, 19
 .equ	BIT_MFC0_DISABLE_BPRED, 3
@@ -41,6 +49,24 @@ mstr = '''
 .macro set_menvcfg_pbmte
 	bseti	x22, x0, BIT_MENVCFG_PBMTE
 	csrs	menvcfg, x22
+.endm
+
+#=================================
+#set ADUE
+#clobbers x22
+#=================================
+.macro set_henvcfg_adue
+	bseti	x22, x0, BIT_MENVCFG_ADUE
+	csrs	henvcfg, x22
+.endm
+
+#=================================
+#set PBMTE
+#clobbers x22
+#=================================
+.macro set_henvcfg_pbmte
+	bseti	x22, x0, BIT_MENVCFG_PBMTE
+	csrs	henvcfg, x22
 .endm
 
 #=================================
@@ -69,6 +95,24 @@ mstr = '''
 .macro write_satp ppn,asid,mode
 	li x22, (\\mode <<60) | (\\asid<<44) | (\\ppn)
 	csrw satp, x22
+.endm
+
+#=================================
+#update vsatp with specified value
+#clobbers x22
+#=================================
+.macro write_vsatp ppn,asid,mode
+	li x22, (\\mode <<60) | (\\asid<<44) | (\\ppn)
+	csrw vsatp, x22
+.endm
+
+#=================================
+#update hgatp with specified value
+#clobbers x22
+#=================================
+.macro write_hgatp ppn,vmid,mode
+	li x22, (\\mode <<60) | (\\vmid<<44) | (\\ppn)
+	csrw hgatp, x22
 .endm
 
 
