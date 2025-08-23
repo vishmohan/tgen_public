@@ -123,7 +123,11 @@ mdata_begin:
 	.set idx, 0
 	.rept 512
 		.set ppn_mod, ppn|idx<<12
-		make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+		.if idx==2
+			make_leaf_pte_entry 0x2 0x0f 0 0
+		.else
+			make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+		.endif
 		.set idx, idx+1
 	.endr
 

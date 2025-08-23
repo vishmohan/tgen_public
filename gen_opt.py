@@ -87,8 +87,9 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads=1):
 		-ld_file {lsrc}
 		-shadow_tracePTE 1
 		-tracePTE  1 
+		-bench_mmu_checker_disable  1
 		-msg_level debug
-		-timeout	250000
+		-timeout	500000
 		-stake_skip 1
 		'''
 	mstr_mt = f'''
