@@ -207,9 +207,9 @@ mdata_begin:
 	.rept 512
 		.set ppn_mod, ppn|idx<<12
 		.if idx==2
-			make_leaf_pte_entry 0x2 0x0f 0 0
+			make_leaf_pte_entry 0x2 0xcf 0 0
 		.else
-			make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+			make_leaf_pte_entry ppn_mod>>12 0xcf 0 0
 		.endif
 		.set idx, idx+1
 	.endr
@@ -220,7 +220,7 @@ mdata_begin:
 	.set idx, 0
 	.rept 512
 		.set ppn_mod, ppn|idx<<12
-		make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+		make_leaf_pte_entry ppn_mod>>12 0xcf 0 0
 		.set idx, idx+1
 	.endr
 
@@ -230,7 +230,7 @@ mdata_begin:
 	.set idx, 0
 	.rept 512
 		.set ppn_mod, ppn|idx<<12
-		make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+		make_leaf_pte_entry ppn_mod>>12 0xcf 0 0
 		.set idx, idx+1
 	.endr
 
@@ -240,7 +240,7 @@ mdata_begin:
 	.set idx, 0
 	.rept 512
 		.set ppn_mod, ppn|idx<<12
-		make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+		make_leaf_pte_entry ppn_mod>>12 0xcf 0 0
 		.set idx, idx+1
 	.endr
 
@@ -264,7 +264,7 @@ mdata_begin:
 	.set ppn, 0
 	.set idx, 0
 	.rept 512
-		make_leaf_pte_entry (ppn<<30)>>12 0x1f 0 0
+		make_leaf_pte_entry (ppn<<30)>>12 0xdf 0 0
 		.set idx, idx+1
 		.set ppn, ppn+1
 	.endr

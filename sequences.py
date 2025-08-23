@@ -233,7 +233,7 @@ def gen_loads_and_stores():
 		base_address = int(info_va[k]["base"],16)
 	else:
 		base_address = int(info[k]["base"],16)
-	num = random.randint(16,32)
+	num = random.randint(8,16)
 	codestr += f"#Generating loads/stores upto {num} count\n"
 	for i in range(num):
 		offset = random.randint(16, 4088)  #4k offset
@@ -498,7 +498,7 @@ def generate_code_sequences(this_segment,final_code_segment):
 		"gen_cbnez_always_taken_backward": 	gen_cbnez_always_taken_backward,
 		"gen_cbeqz_always_taken_forward":		gen_cbeqz_always_taken_forward,
 		"gen_cbeqz_x8always_taken_forward": gen_cbeqz_x8always_taken_forward,
-		#"gen_loads_and_stores": gen_loads_and_stores,
+		"gen_loads_and_stores": gen_loads_and_stores,
 		"gen_call"												: gen_call,
 		"generate_icache_flush"						: generate_icache_flush,
 	}

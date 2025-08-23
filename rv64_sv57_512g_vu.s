@@ -19,8 +19,14 @@ test_begin:
 	bseti	x1, x0, BIT_MSTATUS_MPP_LO
 	bseti	x2, x1, BIT_MSTATUS_MPP_HI
 	csrc	mstatus, x2
-	bseti x1, x1, BIT_MSTATUS_MPV
-	csrs	mstatus, x1 #mstatus.MPP = 2'b01
+	bseti x1, x0, BIT_MSTATUS_MPV
+	csrs	mstatus, x1 #mstatus.MPP = 2'b00 => to go to VU mode
+
+	#set up mtvec
+	la   x2, _hndlr
+	csrw mtvec, x2
+
+
 
 	#update mepc with pc = 0x200000
 	bseti 	x2, x0, 21
@@ -75,10 +81,23 @@ _pass:
     beq     x0, x0, _pass
 _fail:
     li      t0, 0xd0580000
-    addi    t1, x0, 0xff
+    addi    t1, x0, 0x3
     sb      t1, 0(t0)
     fence.i
     beq     x0, x0, _fail
+.align 4
+_hndlr:
+	csrr x1, mcause
+	li   x2, ILLEGAL_INSTRUCTION  #check if mcause = 2 [illegal instruction exception]
+	#bne x1, x2, _fail  					#U mode terminates with illegal instruction exception
+	li	 x2, VIRTUAL_INSTRUCTION	#check if mcause = 0x10 [virtual instruction exception]
+	bne x1, x2, _fail							#VU mode terminates with virtual instruction exception
+	csrr x2, mstatus
+	srli x2, x2, 	BIT_MSTATUS_MPP_LO
+	andi x2, x2, 0x3
+	beqz x2, _pass								#confirm that MPP=2'b00 (from U mode)
+	j	_fail
+
 
 #{.code1:0x100000000:0x800200000}
 .section .code1 , "aw"
@@ -92,6 +111,8 @@ code3_begin:
 #{.code4:0x100600000:0x800000}
 .section .code4 , "aw"
 code4_begin:
+
+
 
 
 #{.mdata:0x2000}
@@ -189,8 +210,8 @@ mdata_begin:
 .section .vptl3, "aw"
 	make_nonleaf_pte_entry 0x14000B 0x1
 	make_nonleaf_pte_entry 0x14000B 0x1
-	make_leaf_pte_entry (2<<30)>>12 0xcf 0 0
-	make_leaf_pte_entry (3<<30)>>12 0xcf 0 0
+	make_leaf_pte_entry (2<<30)>>12 0xdf 0 0
+	make_leaf_pte_entry (3<<30)>>12 0xdf 0 0
 	make_nonleaf_pte_entry 0x14000B 0x1
 
 #{.vptl2:0x14000B000}
@@ -207,9 +228,9 @@ mdata_begin:
 	.rept 512
 		.set ppn_mod, ppn|idx<<12
 		.if idx==2
-			make_leaf_pte_entry 0x2 0x0f 0 0
+			make_leaf_pte_entry 0x2 0xdf 0 0
 		.else
-			make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+			make_leaf_pte_entry ppn_mod>>12 0xdf 0 0
 		.endif
 		.set idx, idx+1
 	.endr
@@ -220,7 +241,7 @@ mdata_begin:
 	.set idx, 0
 	.rept 512
 		.set ppn_mod, ppn|idx<<12
-		make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+		make_leaf_pte_entry ppn_mod>>12 0xdf 0 0
 		.set idx, idx+1
 	.endr
 
@@ -230,7 +251,7 @@ mdata_begin:
 	.set idx, 0
 	.rept 512
 		.set ppn_mod, ppn|idx<<12
-		make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+		make_leaf_pte_entry ppn_mod>>12 0xdf 0 0
 		.set idx, idx+1
 	.endr
 
@@ -240,7 +261,7 @@ mdata_begin:
 	.set idx, 0
 	.rept 512
 		.set ppn_mod, ppn|idx<<12
-		make_leaf_pte_entry ppn_mod>>12 0x0f 0 0
+		make_leaf_pte_entry ppn_mod>>12 0xdf 0 0 #u=1
 		.set idx, idx+1
 	.endr
 
@@ -264,7 +285,7 @@ mdata_begin:
 	.set ppn, 0
 	.set idx, 0
 	.rept 512
-		make_leaf_pte_entry (ppn<<30)>>12 0x1f 0 0
+		make_leaf_pte_entry (ppn<<30)>>12 0xdf 0 0
 		.set idx, idx+1
 		.set ppn, ppn+1
 	.endr
