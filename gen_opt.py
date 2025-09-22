@@ -27,7 +27,7 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads=1):
 	#config_str_mt += f',RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
 
 	myconfig_mt = "rv64_alp1200_mt"
-	mt_ooo = True
+	mt_ooo = False
 	if mt_ooo:
 		myconfig_mt = "rv64_qh_perf_mt"
 		config_str_mt = f'RV64_VA_SIZE=57,NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39'
@@ -88,6 +88,9 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads=1):
 		-shadow_tracePTE 1
 		-tracePTE  1 
 		-bench_mmu_checker_disable  1
+		-bench_ifu_BigTage_collision_inj_en 1
+		-bench_ifu_BigTage_collision_inj_min_delay 100
+		-bench_ifu_BigTage_collision_inj_max_delay 500
 		-msg_level debug
 		-timeout	500000
 		-stake_skip 1

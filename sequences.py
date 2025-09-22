@@ -79,6 +79,67 @@ def	setup_mfc0():
 	return codestr
 
 #*************************************
+#setup mfc1
+#*************************************
+def	setup_mfc1():
+	'''
+		write mfc1 randomly 
+		icache_way_disable 	bit_19:16
+		btbi_m_mode disable 6
+		ras_disable   			5
+		btbi_disable  			4
+		npc_disable   			3
+		ittage_disable 			2
+		tage_disable   			1
+		prefetch_disable 		0
+	'''
+	codestr = ""
+	
+	codestr +=  "add x1, x0, x0\n"
+	icache_way_disable = random.randint(0,1)
+	icache_all_ways = random.randint(0,1)
+	if icache_way_disable:
+		if not icache_all_ways:
+			way = random.randint(0,3)
+			codestr += "bseti x1, x1, BIT_MFC1_ICACHE_WAYDISABLE_LO\n"
+			codestr += f"slli  x1, x1, {way}\n"
+		else:
+			codestr += 	"li x1, 0xf\n"
+			codestr += f"slli  x1, x1, BIT_MFC1_ICACHE_WAYDISABLE_LO\n"
+		
+	btbi_disable = random.randint(0,1)
+	if btbi_disable:
+		codestr += "bseti x1, x1, BIT_MFC1_BTBI_DISABLE\n"
+		codestr += "bseti x1, x1, BIT_MFC1_BTBI_DISABLE_M\n"
+
+	btbi_m_mode_disable = random.randint(0,1)
+	if btbi_m_mode_disable and not btbi_disable:
+		codestr += "bseti x1, x1, BIT_MFC1_BTBI_DISABLE_M\n"
+
+	ras_disable = random.randint(0,1)
+	if ras_disable:
+		codestr += "bseti x1, x1, BIT_MFC1_RAS_DISABLE\n"
+
+	npc_disable = random.randint(0,1)
+	if npc_disable:
+		codestr += "bseti x1, x1, BIT_MFC1_NPC_DISABLE\n"
+
+	ittage_disable = random.randint(0,1)
+	if ittage_disable:
+		codestr += "bseti x1, x1, BIT_MFC1_ITTAGE_DISABLE\n"
+
+	tage_disable = random.randint(0,1)
+	if tage_disable:
+		codestr += "bseti x1, x1, BIT_MFC1_TAGE_DISABLE\n"
+
+	prefetch_disable = random.randint(0,1)
+	if prefetch_disable:
+		codestr += "bseti x1, x1, BIT_MFC1_PREFETCH_DISABLE\n"
+
+	codestr += "csrw mfc1, x1\n"
+
+	return codestr
+#*************************************
 #setup gprs
 #*************************************
 def	setup_gprs():
@@ -573,6 +634,8 @@ def gen_sequences():
 	tstr = setup_gprs()
 	if random.randint(0,1):
 		tstr += setup_mfc0()
+	if random.randint(0,1):
+		tstr += setup_mfc1()
 	tstr += start_test()
 	mstr = re.sub(pattern_setup, r'\1'+tstr  ,mstr)
 

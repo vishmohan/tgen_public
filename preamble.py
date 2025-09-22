@@ -3,6 +3,7 @@ mstr = '''
 .equ mtinst, 0x34a
 .equ mtval2, 0x34b
 .equ mfc0, 0x7f9
+.equ mfc1, 0x7fa
 .equ menvcfg, 0x30a
 .equ mseccfg, 0x747
 
@@ -51,6 +52,17 @@ mstr = '''
 
 .equ	BIT_MFC0_ICACHE_FLUSH, 19
 .equ	BIT_MFC0_DISABLE_BPRED, 3
+
+.equ	BIT_MFC1_ICACHE_WAYDISABLE_HI, 19
+.equ	BIT_MFC1_ICACHE_WAYDISABLE_LO, 16
+.equ  BIT_MFC1_BTBI_DISABLE_M, 				6
+.equ  BIT_MFC1_RAS_DISABLE, 					5
+.equ  BIT_MFC1_BTBI_DISABLE, 					4	
+.equ  BIT_MFC1_NPC_DISABLE, 					3	
+.equ  BIT_MFC1_ITTAGE_DISABLE, 				2	
+.equ  BIT_MFC1_TAGE_DISABLE, 					1	
+.equ  BIT_MFC1_PREFETCH_DISABLE, 		  0
+
 
 .equ	BIT_MENVCFG_ADUE,  61
 .equ	BIT_MENVCFG_PBMTE, 62
