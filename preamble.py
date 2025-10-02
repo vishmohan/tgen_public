@@ -39,16 +39,30 @@ mstr = '''
 .equ SATP_MODE,  				 SV57_PAGING_MODE
 .equ VSATP_MODE, 				 SV57_PAGING_MODE
 
+
+.equ SATP_PPN_SV48, 	 	 0x140001 #4K aligned satp.ppn
+.equ VSATP_PPN_SV48,  	 0x140009 #4K aligned vsatp.ppn
+.equ VSATP_PPN1, 				 0x240000 #4K aligned vsatp.ppn
+
 .equ HGATP_PPN, 	 			 0x140010 #16K aligned satp.ppn
+.equ HGATP_PPN1, 				 0x340010
 .equ HGATP_VMID,   			 1
 .equ HGATP_MODE,   			 SV57_PAGING_MODE
 
+.equ BIT_MISA_HEXT,			 	7
 .equ BIT_MSTATUS_MPP_LO, 11
 .equ BIT_MSTATUS_MPP_HI, 12
 .equ BIT_MSTATUS_MPRV, 	 17
 .equ BIT_MSTATUS_SUM, 	 18
 .equ BIT_MSTATUS_MXR, 	 19
 .equ BIT_MSTATUS_MPV, 	 39
+
+.equ BIT_HSTATUS_SPV,		 	7
+.equ BIT_HSTATUS_SPVP,	 	8
+.equ BIT_HSTATUS_HU,	 	 	9
+
+.equ BIT_SSTATUS_SPP,	 		8
+
 
 .equ	BIT_MFC0_ICACHE_FLUSH, 19
 .equ	BIT_MFC0_DISABLE_BPRED, 3
@@ -241,6 +255,24 @@ mstr = '''
 	.endif
 	
 .endm
+
+#=================================
+#prepare entry to vs mode
+#=================================
+.macro prepare_for_vs_mode 
+
+	#write sstatus.SPP for supervisor
+	csrr x22, 		sstatus
+	bseti x22, 		x22, BIT_SSTATUS_SPP
+	csrw sstatus, x22
+
+	#write hstatus.SPV
+	csrr	x22, hstatus
+	bseti x22, x22, BIT_HSTATUS_SPV
+	csrw	hstatus, x22
+
+.endm
+
 
 
 .macro initialize_registers

@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 import random
 
-def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads=1):
+def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 	''' 
 	generate the opt file 
 	returns a string that is used to create the list file
@@ -13,24 +13,32 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads=1):
 	optname_st = fname + "_st.opt"
 	optname_mt = fname + "_mt.opt"
 	mt_num_threads = num_threads if num_threads > 1 else 4
+	paging_mode_str = ""
+	if pagingmode== "sv57":
+		paging_mode_str = "RV64_VA_SIZE=57,"
 
 	#myconfig_st = random.choice(["rv64_release_qh","rv64_alp5100","rv64_alp5200"]) #for ST
-	myconfig_st = random.choice(["rv64_release_qh"]) #for ST
+	#myconfig_st = random.choice(["rv64_release_qh"]) #for ST
 	myconfig_st = random.choice(["rv64_alp5100"]) #for ST
 
 
 
-	config_str = 'RV64_VA_SIZE=57,RV_BUILD_SVADU=True'#,RV_BTB2_ENABLE=1'
-	config_str_mt = f'RV64_VA_SIZE=57,NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SVADU=True'
+	config_str = f'{paging_mode_str}RV_BUILD_SVADU=True'#,RV_BTB2_ENABLE=1'
+	config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads}'
 	way_predictor = random.choice(["True","False"])
 	ifu_prefetch = random.choice(["True","False"])
 	#config_str_mt += f',RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
 
-	myconfig_mt = "rv64_alp1200_mt"
+	#injector specific options
+	disable_btb_hit = "-bench_ifu_disable_btb_hit 0\n"
+	if random.randint(0,1):
+		disable_btb_hit = "-bench_ifu_disable_btb_hit 1\n"
+
+	myconfig_mt = "rv64_alp1200"
 	mt_ooo = False
 	if mt_ooo:
 		myconfig_mt = "rv64_qh_perf_mt"
-		config_str_mt = f'RV64_VA_SIZE=57,NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39'
+		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39'
 	
 	#btb ovrd params
 	rv_btb2_enable = 1 
@@ -91,6 +99,7 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads=1):
 		-bench_ifu_BigTage_collision_inj_en 1
 		-bench_ifu_BigTage_collision_inj_min_delay 100
 		-bench_ifu_BigTage_collision_inj_max_delay 500
+		{disable_btb_hit}
 		-msg_level debug
 		-timeout	500000
 		-stake_skip 1
