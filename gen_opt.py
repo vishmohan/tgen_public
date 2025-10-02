@@ -123,7 +123,7 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 		-bench_core_fe_timeout 250000
 		-bench_core_be_timeout 250000
 		-bench_core_ldst_op_timeout 150000
-		-timeout	500000
+		-timeout	800000
 		-stepfile_skip 0 
 		-stake_skip 1
 		'''
