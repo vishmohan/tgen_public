@@ -90,12 +90,12 @@ def main():
 		print("L2btb aliases:")
 		helper.show_aliases(h.alias_list)
 		print("========================")
-	#if 'l1btb' in opt_arg and opt_arg['l1btb']==1:
-	#	h = l1btb.l1btb(defines_dict,opt_arg['count'],fullpc)
-	#	h.find_aliasing_pc_l1btb()
-	#	print("L1btb aliases:")
-	#	helper.show_aliases(h.alias_list)
-	#	print("========================")
+	if 'l1btb' in opt_arg and opt_arg['l1btb']==1:
+		h = l1btb.l1btb(defines_dict,opt_arg['count'],fullpc)
+		h.find_aliasing_pc_l1btb()
+		print("L1btb aliases:")
+		helper.show_aliases(h.alias_list)
+		print("========================")
 #=================================================================
 
 
