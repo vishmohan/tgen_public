@@ -15,6 +15,7 @@ ret_info = set() #contains set of all return segments .ret1 , .ret2 etc
 ret_info_exclude = set() #exclusion set [calls will not be generated to these segments]
 data_seg = [".mdata"] 	 #for doing loads
 
+
 arith_logical_ops = {
 	"add":   	("rd","rs1","rs2"),
 	"addi":  	("rd","rs1","imm"), #imm[11:0]
@@ -51,6 +52,12 @@ def pick_one(mstr="rd"):
 		return chosen_reg
 	if mstr=="imm":
 		return random.randint(-2048, 2047)
+
+def get_loop_count():
+	''' return loop count '''
+	loop_cnt_lo = 2
+	loop_cnt_hi = 16
+	return random.randint(loop_cnt_lo, loop_cnt_hi)
 
 #*************************************
 #setup mfc0
@@ -246,7 +253,7 @@ def gen_cbeqz_x8always_taken_forward():
 def gen_cbeqz_always_taken_forward():
 	''' c.beqz always taken foward '''
 	codestr = ""
-	loop_length = random.randint(2,32) #how many instructions does the loop have?
+	loop_length = get_loop_count() #how many instructions does the loop have?
 	codestr += f"#Generating c.beqz always taken (forward) sequence with max loop_length = {loop_length}\n"
 	chosen_reg = random.choice(["x10","x11","x12"]) #compressed sequence must have >= x8
 	rval	= random.randint(1,32)
@@ -268,7 +275,7 @@ def gen_cbeqz_always_taken_forward():
 def gen_cbnez_always_taken_backward():
 	''' c.bnez always taken backward '''
 	codestr = ""
-	loop_length = random.randint(2,32) #how many instructions does the loop have?
+	loop_length = get_loop_count() #how many instructions does the loop have?
 	codestr += f"#Generating c.bnez always taken (backward) sequence with max loop_length = {loop_length}\n"
 	chosen_reg = random.choice(["x10","x11","x12"]) #compressed sequence must have >= x8
 	rval	= random.randint(1,32)
@@ -363,7 +370,7 @@ def gen_unconditional_jmp():
 	''' compressed unconditional jump '''
 	codestr = ""
 	jump_with_link = 0
-	loop_length = random.randint(2,32) #how many instructions to skip
+	loop_length = get_loop_count() #how many instructions to skip
 	codestr += f"#Generating compressed jumps with max loop_length = {loop_length}\n"
 	codestr += gen_arith_logical_instructions(random.randint(1,loop_length))
 	if jump_with_link:
@@ -384,8 +391,8 @@ def gen_unconditional_jmp_backward_jcc():
 	''' compressed unconditional jump with a backward jcc '''
 	codestr = ""
 	jump_with_link = 0
-	loop_length = random.randint(2,32) #how many instructions to skip
-	loop_length1 = random.randint(2,32) #unique loop length for the jal
+	loop_length = get_loop_count() #how many instructions to skip
+	loop_length1 = random.randint(2,16) #unique loop length for the jal
 	codestr += f"#Generating compressed jumps/backward jcc with max loop_length = {loop_length},loop_length1 = {loop_length1} \n"
 	rs1			 = random.choice(gpr_list)
 	idx 		 = gpr_list.index(rs1)
@@ -413,7 +420,7 @@ def gen_unconditional_jmp4():
 	''' uncompressed unconditional jump '''
 	codestr = ""
 	jump_with_link = random.randint(0,1)
-	loop_length = random.randint(2,32) #how many instructions to skip
+	loop_length = get_loop_count() #how many instructions to skip
 	codestr += f"#Generating uncompressed jumps with max loop_length = {loop_length}\n"
 	codestr += gen_arith_logical_instructions(random.randint(1,loop_length))
 	if jump_with_link:
@@ -431,7 +438,7 @@ def gen_unconditional_jmp4_only():
 	''' uncompressed unconditional jump '''
 	codestr = ""
 	jump_with_link = random.randint(0,1)
-	loop_length = random.randint(2,32) #how many instructions to skip
+	loop_length = get_loop_count() #how many instructions to skip
 	codestr += f"#Generating uncompressed jumps \n"
 	if jump_with_link:
 		codestr += "jal x1,	1f\n"
@@ -447,7 +454,7 @@ def gen_unconditional_jmp4_only():
 def gen_backward_bgt_blt():
 	''' backward bgt/bgtu/blt/bltu '''
 	codestr = ""
-	loop_length = random.randint(2,32) #how many instructions does the loop have?
+	loop_length = get_loop_count() #how many instructions does the loop have?
 	codestr += f"#Generating bgt/bgtu taken sequence with max loop_length = {loop_length}\n"
 	signed   = random.randint(0,1)
 	choose_bgt   = random.randint(0,1)
@@ -511,7 +518,7 @@ def gen_backward_bgt_blt():
 def gen_beqz_not_taken():
 	''' beqz always not taken '''
 	codestr = ""
-	loop_length = random.randint(2,32) #how many instructions does the loop have?
+	loop_length = get_loop_count() #how many instructions does the loop have?
 	rs1			 = random.choice(bcond_list)
 	codestr += f"#Generating beqz not taken sequence with max loop_length = {loop_length}\n"
 	codestr += set_label("1")
@@ -526,7 +533,7 @@ def gen_beqz_not_taken():
 def gen_beqz_always_taken_forward():
 	''' beqz always taken forward '''
 	codestr = ""
-	loop_length = random.randint(2,32) #how many instructions does the loop have?
+	loop_length = get_loop_count() #how many instructions does the loop have?
 	codestr += f"#Generating beqz always taken (forward) sequence with max loop_length = {loop_length}\n"
 	chosen_reg = random.choice(gpr_list)
 	if random.randint(0,1):
@@ -545,7 +552,7 @@ def gen_beqz_always_taken_forward():
 def gen_bnez_always_taken_backward():
 	''' bnez always taken backward '''
 	codestr = ""
-	loop_length = random.randint(2,32) #how many instructions does the loop have?
+	loop_length = get_loop_count() #how many instructions does the loop have?
 	codestr += f"#Generating bnez always taken (backward) sequence with max loop_length = {loop_length}\n"
 	chosen_reg = random.choice(gpr_list)
 	rval	= random.randint(1,64)

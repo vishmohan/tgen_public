@@ -47,6 +47,7 @@ def get_skeleton(**kwargs):
 	templates_sv48.append("rv64_sv48_4k_vs.s")
 	templates_sv48.append("rv64_sv48_4k_vs_bare.s")
 	templates_sv48.append("rv64_sv48_4k_svadu_vs.s")
+	templates_sv48 = ["rv64_sv48_4k_vs.s"]
 	pagingmode = kwargs['pagingmode']
 	if pagingmode == "sv48":
 		mname = random.choice(templates_sv48)
