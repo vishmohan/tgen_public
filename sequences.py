@@ -236,9 +236,10 @@ def generate_return_sequences(retname):
 
 #*************************************
 #11. generate compressed c.beqz with x8
+#branches will split fetch group
 #*************************************
 def gen_cbeqz_x8always_taken_forward():
-	''' c.beqz always taken forward with x0 '''
+	''' c.beqz always taken forward with x8 '''
 	codestr = ""
 	codestr += f"#Generating c.beqz x8 always taken (forward) sequence\n" 
 	codestr += "xor x8, x8, x8\n"
@@ -432,7 +433,7 @@ def gen_unconditional_jmp4():
 	return codestr
 
 #*************************************
-#5. generate jal, j
+#5a. generate jal, j
 #*************************************
 def gen_unconditional_jmp4_only():
 	''' uncompressed unconditional jump '''
@@ -444,8 +445,24 @@ def gen_unconditional_jmp4_only():
 		codestr += "jal x1,	1f\n"
 	else:
 		codestr += "j	1f\n"
-	codestr += gen_arith_logical_instructions(random.randint(1,loop_length))
 	codestr += set_label("1") 
+	return codestr
+
+#*************************************
+#5b. generate jalr
+#*************************************
+def gen_unconditional_jmp_chain():
+	''' jalr unconditional jump chain '''
+	codestr = ""
+	codestr += f"#Generating chain of uncompressed jumps \n"
+	chosen_reg = random.choice(gpr_list)
+	length = random.randint(8,20)
+	for i in range(length):
+		codestr += f"la {chosen_reg}, 	1f\n"
+		codestr += f"jalr {chosen_reg}, ({chosen_reg})\n"
+		if random.randint(0,1):
+			codestr += f"li {chosen_reg}, {i}\n" #dummy instruction
+		codestr += set_label("1") 
 	return codestr
 
 #*************************************
@@ -547,6 +564,25 @@ def gen_beqz_always_taken_forward():
 	return codestr
 
 #*************************************
+#2a. generate beqz only
+#branches will split fetch group
+#*************************************
+def gen_beqz_chain_always_taken_forward():
+	''' beqz always taken forward '''
+	codestr = ""
+	length = random.randint(8,20)
+	codestr += f"#Generating beqz always taken (forward) chain length = {length}\n"
+	chosen_reg = random.choice(gpr_list)
+	for i in range(length):
+		if random.randint(0,1):
+			codestr += f"xor {chosen_reg}, {chosen_reg}, {chosen_reg}\n"
+			codestr += f"beqz {chosen_reg}, 1f\n"
+		else:
+			codestr += f"beqz x0, 1f\n" #use x0 50% of the time
+		codestr += set_label("1")
+	return codestr
+
+#*************************************
 #1. generate bnez always taken
 #*************************************
 def gen_bnez_always_taken_backward():
@@ -635,13 +671,15 @@ def generate_code_sequences(this_segment,final_code_segment):
 		"gen_beqz_not_taken":								gen_beqz_not_taken,
 		"gen_unconditional_jmp": 						gen_unconditional_jmp,
 		"gen_unconditional_jmp4": 					gen_unconditional_jmp4,
+		"gen_unconditional_jmp_chain":			gen_unconditional_jmp_chain,
 		"gen_unconditional_jmp4_only":			gen_unconditional_jmp4_only,
 		"gen_unconditional_jmp_backward_jcc": gen_unconditional_jmp_backward_jcc,
 		"gen_beqz_always_taken_forward": 		gen_beqz_always_taken_forward,
 		"gen_bnez_always_taken_backward": 	gen_bnez_always_taken_backward,
 		"gen_cbnez_always_taken_backward": 	gen_cbnez_always_taken_backward,
 		"gen_cbeqz_always_taken_forward":		gen_cbeqz_always_taken_forward,
-		"gen_cbeqz_x8always_taken_forward": gen_cbeqz_x8always_taken_forward,
+		"gen_cbeqz_x8always_taken_forward": 	 gen_cbeqz_x8always_taken_forward,
+		"gen_beqz_chain_always_taken_forward": gen_beqz_chain_always_taken_forward,
 		"gen_loads_and_stores"						: gen_loads_and_stores,
 		"gen_stlf"												:	gen_stlf,
 		"gen_call"												: gen_call,

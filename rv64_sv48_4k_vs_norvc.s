@@ -1,3 +1,5 @@
+.option norvc
+
 .equ	guest_code_begin, 		0x200000
 .equ	supervisor_code_begin, 0x800000000
 
