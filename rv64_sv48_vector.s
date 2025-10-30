@@ -1,6 +1,41 @@
 .equ	guest_code_begin, 		0x200000
 .equ	supervisor_code_begin, 0x800000000
 
+
+
+#=====================================
+#macro for the vector sequence
+#=====================================
+.macro do_vector_sequence_b5489 num
+	lui		x12, 3
+	lui		x1,  2
+	.rept \num 
+		li		x14, 2
+		j			1f
+		2:
+		.rept 15
+			nop
+		.endr
+		3:
+		.rept 15
+			nop
+		.endr
+	1:
+	.rept 2
+		vadd.vi		v0, v0, 1
+		vse8.v		v0, (x1)
+		vle8.v		v1, (x1)
+		vadd.vi		v1, v1, 1
+		vse8.v		v1, (x12)
+		vle8.v		v0, (x12)
+	.endr
+		addi x14, x14, -1
+		bgtz x14, 2b
+		beqz x14, 3b
+	.endr
+.endm
+#=====================================
+
 .global _start
 
 #{.text.init:0x00000000}
@@ -15,24 +50,38 @@ _start:
 .section .text
 
 test_begin:
+	set_menvcfg_pbmte
+
 	li		x13, 0xc0010000
 
 	#setup mstatus to jump to supervisor mode
 	bseti	x1, x0, BIT_MSTATUS_MPP_LO
 	bseti	x2, x1, BIT_MSTATUS_MPP_HI
-	csrc	mstatus, x2
+	bseti x2, x2, BIT_MSTATUS_VS_LO  #bit9  vector status
+	bseti x2, x2, BIT_MSTATUS_VS_HI  #bit10 vector status
+	csrc	mstatus, x2	#clear MPP and VS vector registers OFF
 	#bseti	x1, x1, BIT_MSTATUS_MPV 
-	csrs	mstatus, x1 #mstatus.MPP = 2'b01 , MPV=0
+	bseti	x1, x1, BIT_MSTATUS_VS_LO	 #vector registers in init status
+	csrs	mstatus, x1 #mstatus.MPP = 2'b01 , VS=2'b01
+
+	#configure vector parameters
+	vsetvli	x22, x30, e8, m1, ta, ma  #x30 = (AVL) 256
+
 
 	#update mepc 
 	li			x1,	supervisor_code_begin
 	csrw	mepc, x1			
 
+	write_vsatp	VSATP_PPN1, VSATP_ASID, SV48_PAGING_MODE
 	write_satp	VSATP_PPN1, VSATP_ASID, SV48_PAGING_MODE
 	#write_hgatp	HGATP_PPN1, HGATP_VMID, SV48_PAGING_MODE
 
-	#no delegation
+	#medeleg[9] = 1 ecall 
+	#ecall handler uncacheable via pbmt
 	csrw medeleg, x0
+	li   x2, 1
+	slli x2, x2, ECALL_SMODE
+	csrrs x1, medeleg, x2
 
 	#update sscratch with return pc
 	la		x2, _pass
@@ -51,15 +100,7 @@ test_begin:
 	csrw vstvec, x2
 
 	#initialize pmp0
-	li		x22, 0
-	li		x23, 256<<30
-	srli	x22, x22, 2 #base>>2
-	srli	x23, x23, 3 #size>>3
-	add	  x22, x22, x23
-	addi  x22, x22, -1
-	csrw	pmpaddr0, x22
-	li		x22, 0x1f
-	csrw	pmpcfg0, x22
+	init_pmp 0, 0, 38, 3, 0, 7
 
 	#initialize pma
 	li		x22, 0x5555555555
@@ -70,6 +111,7 @@ test_begin:
 
 #register initialization goes here
 test_setup:
+	csrr x1, mhartid
 	mret 
 	j _fail
 
@@ -102,41 +144,77 @@ _handler_vs:
 		csrr		x1, stval
 		csrr		x1, htinst
 		csrr		x1, htval
+		csrr    x1, sepc
+		addi    x1, x1, 4
+		csrw    sepc, x1
+		sret
 		csrr	  x1, sscratch
 		ret
 
 
+.equ t3_code, 0x4040020f0
+
 #{.code1:0x200000:0x200000}
 .section .code1 , "aw"
 guest_code_begin:
+  beqz  x1, continue_test_t0	
+	li		x12, 1
+	beq   x1, x12, continue_test_t1
+	li		x12, 2
+	beq   x1, x12, continue_test_t2
+	li		x12, t3_code
+	jalr x12, (x12) #t3 jumps to handler
+	
+continue_test_t1:
+	do_vector_sequence_b5489 32
+	bseti x1, x0,34 
+	ret #jump to code2
+
+continue_test_t2:
+	do_vector_sequence_b5489 32
+	li x1, 0x402001034
+	ret #jump to code3
+
+continue_test_t0:
+	do_vector_sequence_b5489 32
 code1_begin:
+
 
 #{.code2:0x400000000:0x400000000}
 .section .code2 , "aw"
+	do_vector_sequence_b5489 32 
 code2_begin:
 
 #{.code3:0x402001034:0x402001034}
 .section .code3 , "aw"
+	do_vector_sequence_b5489 32
 code3_begin:
 	
 #{.code4:0x40500293c:0x40500293c}
 .section .code4 , "aw"
+	do_vector_sequence_b5489 32
 code4_begin:
 
 #{.code5:0x4070039a8:0x4070039a8}
 .section .code5 , "aw"
+	do_vector_sequence_b5489 16
 code5_begin:
 
+#no code6_begin donot want random instructions here
 #{.code6:0x4040020f0:0x4040020f0}
 .section .code6 , "aw"
-code6_begin:
+	.rept 512
+		ecall
+	.endr
+	do_vector_sequence_b5489 4 
+	finish_test
 
-
+#covers 0x2000-0x3fff
 #{.mdata:0x2000}
 .section .mdata , "aw"
 mdata_begin:
 .set dat, 1
-.rept 512
+.rept 1024
 	.dword dat
 	.set 	dat, dat+1
 .endr	
@@ -173,7 +251,11 @@ mdata_begin:
 		make_nonleaf_pte_entry 0x240002 0x21  			
 		.set idx, 1
 		.rept 511
-			make_leaf_pte_entry (idx<<30)>>12 0xcf 0 0
+			.if idx==1
+				make_leaf_pte_entry (idx<<30)>>12 0xcf 0 1 #pbmt = 1 
+			.else
+				make_leaf_pte_entry (idx<<30)>>12 0xcf 0 0
+			.endif
 		  .set idx, idx+1
 		.endr
 

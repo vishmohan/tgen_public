@@ -50,6 +50,8 @@ mstr = '''
 .equ HGATP_MODE,   			 SV57_PAGING_MODE
 
 .equ BIT_MISA_HEXT,			 	7
+.equ BIT_MSTATUS_VS_LO,   9
+.equ BIT_MSTATUS_VS_HI,  10
 .equ BIT_MSTATUS_MPP_LO, 11
 .equ BIT_MSTATUS_MPP_HI, 12
 .equ BIT_MSTATUS_MPRV, 	 17
@@ -85,6 +87,7 @@ mstr = '''
 .equ    BIT_MMWP, 				1
 .equ    BIT_RLB,  				2
 
+.equ ECALL_SMODE, 9
 
 .equ	ILLEGAL_INSTRUCTION, 2
 .equ	VIRTUAL_INSTRUCTION, 0x16

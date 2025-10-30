@@ -28,7 +28,7 @@ test_begin:
 	li			x1,	supervisor_code_begin
 	csrw	mepc, x1			
 
-	write_vsatp	VSATP_PPN1, VSATP_ASID, SV48_PAGING_MODE
+	write_satp	VSATP_PPN1, VSATP_ASID, SV48_PAGING_MODE
 	#write_hgatp	HGATP_PPN1, HGATP_VMID, SV48_PAGING_MODE
 
 	#no delegation
