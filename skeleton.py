@@ -51,6 +51,7 @@ def get_skeleton(**kwargs):
 	templates_sv48.append("rv64_sv48_4k_1.s")
 	templates_sv48.append("rv64_sv48_vector.s")
 	templates_sv48.append("rv64_sv48_vector_1.s")
+	templates_sv48.append("rv64_sv48_vector_2.s")
 
 	pagingmode = kwargs['pagingmode']
 	if pagingmode == "sv48":
