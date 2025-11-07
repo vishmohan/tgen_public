@@ -24,22 +24,33 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 
 
 	config_str = f'{paging_mode_str}RV_BUILD_SVADU=True'#,RV_BTB2_ENABLE=1'
-	config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads}'
+	config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV_BUILD_SMRNMI=False'
 	way_predictor = random.choice(["True","False"])
 	ifu_prefetch = random.choice(["True","False"])
 	#config_str_mt += f',RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
 
 	#injector specific options
-	disable_btb_hit = "-bench_ifu_disable_btb_hit 0\n"
-	if random.randint(0,1):
-		disable_btb_hit = "-bench_ifu_disable_btb_hit 1\n"
+	#disable btb hit
+	disable_btb_hit = random.randint(0,1)
+	#dec_avail_inj parameters
+	dec_avail_inj_min_delay = random.randint(8,20)
+	dec_avail_inj_max_delay = random.randint(22,50)
+	#axi response delay
+	long_delay = random.uniform(0,1)
+	if long_delay > 0.1:
+		axi4_min_response_delay = random.randint(10,20)
+		axi4_max_response_delay = random.randint(21,80)
+	else:
+		axi4_min_response_delay = random.randint(150,200)
+		axi4_max_response_delay = random.randint(300,400)
 
 	myconfig_mt = "rv64_alp1200"
 	mt_ooo = False
 	if mt_ooo:
 		myconfig_mt = "rv64_qh_perf_mt"
-		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39'
+		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False'
 	
+
 	#btb ovrd params
 	rv_btb2_enable = 1 
 	rv_btb2_tag_size = random.choice([10,14])
@@ -99,7 +110,12 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 		-bench_ifu_BigTage_collision_inj_en 1
 		-bench_ifu_BigTage_collision_inj_min_delay 100
 		-bench_ifu_BigTage_collision_inj_max_delay 500
-		{disable_btb_hit}
+		-bench_ifu_dec_avail_inj_en 1 
+		-bench_ifu_dec_avail_inj_min_delay {dec_avail_inj_min_delay}
+		-bench_ifu_dec_avail_inj_max_delay {dec_avail_inj_max_delay}
+		-bench_axi4_min_response_delay 		 {axi4_min_response_delay}
+		-bench_axi4_max_response_delay     {axi4_max_response_delay}
+		-bench_ifu_disable_btb_hit {disable_btb_hit}
 		-msg_level debug
 		-timeout	500000
 		-stake_skip 1
@@ -122,10 +138,12 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 		-bench_ifu_fetch_delay 40
 		-bench_core_fe_timeout 250000
 		-bench_core_be_timeout 250000
-		-bench_core_ldst_op_timeout 150000
+		-bench_core_ldst_op_timeout 1500000
 		-bench_ifu_dec_avail_inj_en 1 
-		-bench_ifu_dec_avail_inj_min_delay 20 
-		-bench_ifu_dec_avail_inj_max_delay 50
+		-bench_ifu_dec_avail_inj_min_delay {dec_avail_inj_min_delay}
+		-bench_ifu_dec_avail_inj_max_delay {dec_avail_inj_max_delay}
+		-bench_axi4_min_response_delay 		 {axi4_min_response_delay}
+		-bench_axi4_max_response_delay     {axi4_max_response_delay}
 		-timeout	8000000
 		-stepfile_skip 0 
 		-stake_skip 1

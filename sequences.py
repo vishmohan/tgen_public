@@ -725,7 +725,7 @@ def generate_code_sequences(this_segment,final_code_segment):
 
 def gen_sequences(**kwargs):
 	pagingmode = kwargs['pagingmode']
-	mstr = skeleton.get_skeleton(pagingmode=pagingmode) 
+	mstr, nopreamble = skeleton.get_skeleton(pagingmode=pagingmode) 
 	info.clear()
 	info_va.clear()
 	ret_info.clear()
@@ -781,7 +781,7 @@ def gen_sequences(**kwargs):
 
 
 
-	return mstr
+	return mstr, nopreamble
 
 
 

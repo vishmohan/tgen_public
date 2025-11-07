@@ -11,6 +11,10 @@ def gen_test(**kwargs):
 	suffix = kwargs['suffix']
 	pagingmode = kwargs['pagingmode']
 	mstr += preamble.get_preamble()
-	mstr += sequences.gen_sequences(pagingmode=pagingmode)
+	tstr, nopreamble = sequences.gen_sequences(pagingmode=pagingmode) #some skeletons do not need a preamble
+	if nopreamble:
+		mstr = tstr
+	else:
+		mstr += tstr
 	with open(fullpath+fname+suffix,"w") as f:
 		print(mstr, file=f)

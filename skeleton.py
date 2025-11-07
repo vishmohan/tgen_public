@@ -24,6 +24,9 @@ def parse_skeleton(fname):
 
 def get_skeleton(**kwargs):
 	''' returns the skeleton as a string '''
+	nopreamble_skeletons = ["b5489_2.s", "b5489_3.s", "b5489_4.s", "b5489_5.s"]
+	nopreamble = 0
+
 	#sv57 templates
 	templates = ["rv64_sv57_512g.s","template_branch.s","rv64_branch_aliasing1.s"]
 	templates.append("rv64_sv57_512g_1.s")
@@ -53,14 +56,26 @@ def get_skeleton(**kwargs):
 	templates_sv48.append("rv64_sv48_vector_1.s")
 	templates_sv48.append("rv64_sv48_vector_2.s")
 
+	#templates_sv48 = ["b5489_2.s","b5489_3.s","b5489_4.s","b5489_5.s"]
+	#templates_sv48.append("rv64_sv48_4k.s")
+	#templates_sv48.append("rv64_sv48_4k_1.s")
+	#templates_sv48.append("rv64_sv48_vector.s")
+	#templates_sv48.append("rv64_sv48_vector_1.s")
+	#templates_sv48.append("rv64_sv48_vector_2.s")
+
 	pagingmode = kwargs['pagingmode']
 	if pagingmode == "sv48":
 		mname = random.choice(templates_sv48)
 	else:
 		mname = random.choice(templates)
+
+	#if chosen skeleton does not require preamble set flag 
+	if mname in nopreamble_skeletons:
+		nopreamble = 1
+
 	mstr = ""
 	parse_skeleton(mname) #populate sections and their bases in the segments dictionary
 	mstr += f"##skeleton name: {mname}\n"
 	with open(mname,"r") as f:
 		mstr += f.read()
-	return mstr
+	return mstr, nopreamble
