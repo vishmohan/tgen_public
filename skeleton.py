@@ -24,7 +24,7 @@ def parse_skeleton(fname):
 
 def get_skeleton(**kwargs):
 	''' returns the skeleton as a string '''
-	nopreamble_skeletons = ["b5489_2.s", "b5489_3.s", "b5489_4.s", "b5489_5.s"]
+	nopreamble_skeletons = ["b5489_2.s", "b5489_3.s", "b5489_4.s", "b5489_5.s", "b5489_6.s"]
 	nopreamble = 0
 
 	#sv57 templates
@@ -55,13 +55,21 @@ def get_skeleton(**kwargs):
 	templates_sv48.append("rv64_sv48_vector.s")
 	templates_sv48.append("rv64_sv48_vector_1.s")
 	templates_sv48.append("rv64_sv48_vector_2.s")
+	templates_sv48.append("b5489_2.s")
+	templates_sv48.append("b5489_3.s")
+	templates_sv48.append("b5489_4.s")
+	templates_sv48.append("b5489_5.s")
+	templates_sv48.append("b5489_6.s")
 
-	#templates_sv48 = ["b5489_2.s","b5489_3.s","b5489_4.s","b5489_5.s"]
+	#templates_sv48 = ["b5489_2.s","b5489_3.s","b5489_4.s","b5489_5.s","b5489_6.s"]
 	#templates_sv48.append("rv64_sv48_4k.s")
 	#templates_sv48.append("rv64_sv48_4k_1.s")
 	#templates_sv48.append("rv64_sv48_vector.s")
 	#templates_sv48.append("rv64_sv48_vector_1.s")
 	#templates_sv48.append("rv64_sv48_vector_2.s")
+
+	
+
 
 	pagingmode = kwargs['pagingmode']
 	if pagingmode == "sv48":
