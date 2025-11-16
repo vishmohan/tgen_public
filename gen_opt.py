@@ -33,13 +33,17 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 	#disable btb hit
 	disable_btb_hit = random.randint(0,1)
 	#dec_avail_inj parameters
+	dec_avail_inj_en = random.randint(0,1)
 	dec_avail_inj_min_delay = random.randint(8,20)
 	dec_avail_inj_max_delay = random.randint(22,50)
 	#axi response delay
 	long_delay = random.uniform(0,1)
-	if long_delay > 0.1:
+	if long_delay > 0.1 and long_delay < 0.3:
 		axi4_min_response_delay = random.randint(10,20)
 		axi4_max_response_delay = random.randint(21,80)
+	elif long_delay > 0.3 and long_delay < 0.9:
+		axi4_min_response_delay = random.randint(10,15)
+		axi4_max_response_delay = random.randint(16,18)
 	else:
 		axi4_min_response_delay = random.randint(150,200)
 		axi4_max_response_delay = random.randint(300,400)
@@ -110,7 +114,7 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 		-bench_ifu_BigTage_collision_inj_en 1
 		-bench_ifu_BigTage_collision_inj_min_delay 100
 		-bench_ifu_BigTage_collision_inj_max_delay 500
-		-bench_ifu_dec_avail_inj_en 1 
+		-bench_ifu_dec_avail_inj_en 			 {dec_avail_inj_en}
 		-bench_ifu_dec_avail_inj_min_delay {dec_avail_inj_min_delay}
 		-bench_ifu_dec_avail_inj_max_delay {dec_avail_inj_max_delay}
 		-bench_axi4_min_response_delay 		 {axi4_min_response_delay}
@@ -139,7 +143,7 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 		-bench_core_fe_timeout 250000
 		-bench_core_be_timeout 250000
 		-bench_core_ldst_op_timeout 1500000
-		-bench_ifu_dec_avail_inj_en 1 
+		-bench_ifu_dec_avail_inj_en 			 {dec_avail_inj_en}
 		-bench_ifu_dec_avail_inj_min_delay {dec_avail_inj_min_delay}
 		-bench_ifu_dec_avail_inj_max_delay {dec_avail_inj_max_delay}
 		-bench_axi4_min_response_delay 		 {axi4_min_response_delay}
