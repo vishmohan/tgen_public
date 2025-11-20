@@ -36,6 +36,8 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 	dec_avail_inj_en = random.randint(0,1)
 	dec_avail_inj_min_delay = random.randint(8,20)
 	dec_avail_inj_max_delay = random.randint(22,50)
+	#itlb_invalidate_inj 
+	itlb_invalidate_inj_en = random.randint(0,1)
 	#axi response delay
 	long_delay = random.uniform(0,1)
 	if long_delay > 0.1 and long_delay < 0.3:
@@ -120,6 +122,7 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 		-bench_axi4_min_response_delay 		 {axi4_min_response_delay}
 		-bench_axi4_max_response_delay     {axi4_max_response_delay}
 		-bench_ifu_disable_btb_hit {disable_btb_hit}
+		-bench_ifu_itlb_invalidate_inj_en {itlb_invalidate_inj_en}
 		-msg_level debug
 		-timeout	500000
 		-stake_skip 1
@@ -148,6 +151,7 @@ def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
 		-bench_ifu_dec_avail_inj_max_delay {dec_avail_inj_max_delay}
 		-bench_axi4_min_response_delay 		 {axi4_min_response_delay}
 		-bench_axi4_max_response_delay     {axi4_max_response_delay}
+		-bench_ifu_itlb_invalidate_inj_en {itlb_invalidate_inj_en}
 		-timeout	8000000
 		-stepfile_skip 0 
 		-stake_skip 1
