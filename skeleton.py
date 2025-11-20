@@ -62,14 +62,13 @@ def get_skeleton(**kwargs):
 	templates_sv48.append("b5489_6.s")
 	templates_sv48.append("b5489_7.s")
 	templates_sv48.append("b5489_8.s")
-	#templates_sv48 = ["b5489_7.s"]
 
-	templates_sv48 = ["b5489_2.s","b5489_3.s","b5489_4.s","b5489_5.s","b5489_6.s","b5489_7.s","b5489_8.s"]
-	templates_sv48.append("rv64_sv48_4k.s")
-	templates_sv48.append("rv64_sv48_4k_1.s")
-	templates_sv48.append("rv64_sv48_vector.s")
-	templates_sv48.append("rv64_sv48_vector_1.s")
-	templates_sv48.append("rv64_sv48_vector_2.s")
+	#templates_sv48 = ["b5489_2.s","b5489_3.s","b5489_4.s","b5489_5.s","b5489_6.s","b5489_7.s","b5489_8.s"]
+	#templates_sv48.append("rv64_sv48_4k.s")
+	#templates_sv48.append("rv64_sv48_4k_1.s")
+	#templates_sv48.append("rv64_sv48_vector.s")
+	#templates_sv48.append("rv64_sv48_vector_1.s")
+	#templates_sv48.append("rv64_sv48_vector_2.s")
 
 	
 
