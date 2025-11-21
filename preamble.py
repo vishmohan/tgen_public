@@ -321,6 +321,6 @@ mstr = '''
 
 '''
 
-def get_preamble():
+def get_preamble(**kwargs):
 	return mstr
 

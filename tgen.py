@@ -8,7 +8,7 @@ import gen_opt
 import os
 
 def getargs():
-	options, remainder = getopt.getopt(sys.argv[1:],'',['count=','threads=','pagingmode='])
+	options, remainder = getopt.getopt(sys.argv[1:],'',['count=','threads=','pagingmode=','arch='])
 	opt_arg = {}
 	for opt,arg in options:
 		if opt=='--count':
@@ -17,6 +17,8 @@ def getargs():
 			opt_arg["threads"]=int(arg)
 		elif opt=='--pagingmode':
 			opt_arg["pagingmode"]=arg
+		elif opt=='--arch':
+			opt_arg["arch"]=arg
 
 	return opt_arg
 
@@ -30,6 +32,9 @@ def main():
 	tcount = switches['count'] if 'count' in switches else 1
 	num_threads = switches['threads'] if 'threads' in switches else 1
 	pagingmode = switches['pagingmode'] if 'pagingmode' in switches else "sv57"
+	arch = switches["arch"] if 'arch' in switches else 'rv64'
+	if arch=="rv32":
+		pagingmode = "sv32"
 	lstr = ""
 	lfname = "test_" + p + ".list"
 	create_dir = f"mkdir {fullpath}"
@@ -52,10 +57,21 @@ def main():
 		fname = "test_"+str(i)+"_"+p
 		suffix_asm = ".s"
 		suffix_linker = ".ld"
-		gen_test.gen_test(fname=fname,suffix=suffix_asm,fullpath=fullpath,pagingmode=pagingmode)
+
+		testargs = {'fname':fname, 'suffix_asm':suffix_asm, 'suffix_linker':suffix_linker}
+		testargs['fullpath']=fullpath
+		testargs['pagingmode']= pagingmode
+		testargs['arch']=arch
+		testargs['num_threads']=num_threads
+
+		#old
+		#gen_test.gen_test(fname=fname,suffix=suffix_asm,fullpath=fullpath,pagingmode=pagingmode,arch=arch)
+		gen_test.gen_test(**testargs)
+
 		gen_linker.gen_linker(fname,suffix_linker,suffix_asm,fullpath)
 		#generate opt and return list file value
-		lstr += gen_opt.gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode) 
+		#lstr += gen_opt.gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode) 
+		lstr += gen_opt.gen_opt(**testargs) 
 	print(f"Done generating {tcount} tests")
 	print(f"Writing list file: {lfname}")
 	with open(fullpath+lfname,"w") as fout:

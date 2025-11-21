@@ -1,11 +1,19 @@
 #! /usr/bin/env python3
 import random
 
-def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
+#def	gen_opt(fname,suffix_asm,suffix_linker,fullpath,num_threads,pagingmode):
+def	gen_opt(**kwargs):
 	''' 
 	generate the opt file 
 	returns a string that is used to create the list file
 	'''
+
+	fname = kwargs['fname']
+	suffix_asm = kwargs['suffix_asm']
+	suffix_linker = kwargs['suffix_linker']
+	fullpath = kwargs['fullpath']
+	num_threads = kwargs['num_threads']
+	pagingmode = kwargs['pagingmode']
 
 	src = fname + suffix_asm
 	lsrc = fname + suffix_linker

@@ -25,6 +25,7 @@ def parse_skeleton(fname):
 def get_skeleton(**kwargs):
 	''' returns the skeleton as a string '''
 	nopreamble_skeletons = ["b5489_2.s", "b5489_3.s", "b5489_4.s", "b5489_5.s", "b5489_6.s","b5489_7.s","b5489_8.s"]
+	nopreamble_skeletons.append("rv32_simple.s")
 	nopreamble = 0
 
 	#sv57 templates
@@ -71,6 +72,7 @@ def get_skeleton(**kwargs):
 	#templates_sv48.append("rv64_sv48_vector_2.s")
 
 	
+	templates_sv32 = ["rv32_simple.s"]
 
 
 	pagingmode = kwargs['pagingmode']
@@ -78,6 +80,9 @@ def get_skeleton(**kwargs):
 		mname = random.choice(templates_sv48)
 	else:
 		mname = random.choice(templates)
+
+	if pagingmode == "sv32":
+		mname = random.choice(templates_sv32)
 
 	#if chosen skeleton does not require preamble set flag 
 	if mname in nopreamble_skeletons:
