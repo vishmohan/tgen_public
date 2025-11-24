@@ -15,6 +15,11 @@
 .equ mfc0, 0x7f9
 .equ mfc1, 0x7fa
 
+#only to be used with dumpparser
+.macro do_eot_checks
+		la x3, _eot_check_start
+    jalr x0, (x3)
+.endm
 
 .macro initialize_registers
 	li x0,  0
@@ -65,24 +70,24 @@ _start:
     initialize_registers
 		start_test:
 			#update sscratch with return pc
-			la		x2, _pass
+			la		x2, _pass1
 			csrw	mscratch, x2
     	bseti x1, x0, 31
 			li	x1, 1
 			slli x1, x1, 31
 			ret				# expands to jalr  x0, (x1)
-_pass:
+_pass1:
     li      t0, 0xd0580000
     addi    t1, x0, 0xff
     sb      t1, 0(t0)
     fence.i
-    beq     x0, x0, _pass
-_fail:
+    beq     x0, x0, _pass1
+_fail1:
     li      t0, 0xd0580000
     addi    t1, x0, 0xff
     sb      t1, 0(t0)
     fence.i
-    beq     x0, x0, _fail
+    beq     x0, x0, _fail1
 
 
 

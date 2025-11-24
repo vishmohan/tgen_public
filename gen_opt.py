@@ -14,12 +14,17 @@ def	gen_opt(**kwargs):
 	fullpath = kwargs['fullpath']
 	num_threads = kwargs['num_threads']
 	pagingmode = kwargs['pagingmode']
+	arch = kwargs['arch']
 
 	src = fname + suffix_asm
 	lsrc = fname + suffix_linker
 	optname = fname + ".opt"
 	optname_st = fname + "_st.opt"
 	optname_mt = fname + "_mt.opt"
+	optname_tblite = fname + "_tblite.opt"
+	optname_gatesim = fname + "_gatesim.opt"
+	optname_uvm = fname + "_uvm.opt"
+
 	mt_num_threads = num_threads if num_threads > 1 else 4
 	paging_mode_str = ""
 	if pagingmode== "sv57":
@@ -46,6 +51,9 @@ def	gen_opt(**kwargs):
 	dec_avail_inj_max_delay = random.randint(22,50)
 	#itlb_invalidate_inj 
 	itlb_invalidate_inj_en = random.randint(0,1)
+	#parity injector
+	parity_inj_en = random.randint(0,1)
+
 	#axi response delay
 	long_delay = random.uniform(0,1)
 	if long_delay > 0.1 and long_delay < 0.3:
@@ -106,7 +114,69 @@ def	gen_opt(**kwargs):
 		if ras_ovrd:
 			config_str += ras_ovrd_str
 
-	
+
+	mstr_rv32_uvm = f'''
+-arch rv32
+-march rv32gcv_zba_zbb_zbc_zbs_svinval
+-config_shasta=rv32_alp120
+-config_ovr MAILBOX_ADDR=0xd0580000,RV_COMPILE_SFX_MEM=True
+-config_turlock=turlock_aia
+-gate_sim=0
+-harts=1
+-maxinstr=50000
+-shadow_skip=1
+-stepfile_skip=1
+-stake_skip=1
+-tblite_trc_en=1
+-test {src}
+-timeout=500000
+-ld_file {lsrc}
+	'''	
+
+	mstr_rv32_tblite = f'''
+-arch rv32
+-march rv32gcv_zba_zbb_zbc_zbs_svinval
+-config_shasta=rv32_alp120
+-config_ovr MAILBOX_ADDR=0xd0580000,RV_COMPILE_SFX_MEM=True
+-config_turlock=turlock_aia
+-gate_sim=0
+-harts=1
+-maxinstr=50000
+-shadow_skip=1
+-stepfile_skip=1
+-stake_skip=1
+-tblite_trc_en=1
+-test {src}
+-timeout=500000
+-ld_file {lsrc}
+-tb_lite=1
+-tb_lite_vip=1
+-console_check "TEST PASSED"
+	'''	
+
+	#for gatesim tests after adding eot_checks
+	addon = '-console_check "TEST PASSED"'
+
+	mstr_rv32_gate = f'''
+-arch=rv32
+-march rv32gcv_zba_zbb_zbc_zbs_svinval
+-config_shasta=rv32_alp120
+-config_ovr GATE_SIM=1,SIGNAL_GATE=1,GATE_SIM_WRAPPER=1,SF_GATE_SIM=1,MAILBOX_ADDR=0xd0580000
+-config_turlock=turlock_aia
+-gate_sim=1
+-harts=1
+-maxinstr=100000
+-shadow_skip=1
+-stepfile_skip=1
+-stake_skip=1
+-tb_lite=1
+-tb_lite_vip=1
+-tblite_trc_en=1
+-test {src}
+-timeout=500000
+-ld_file {lsrc}
+-console_check "TEST PASSED"
+	'''
 
 	mstr = f'''
 		-test {src}
@@ -131,6 +201,7 @@ def	gen_opt(**kwargs):
 		-bench_axi4_max_response_delay     {axi4_max_response_delay}
 		-bench_ifu_disable_btb_hit {disable_btb_hit}
 		-bench_ifu_itlb_invalidate_inj_en {itlb_invalidate_inj_en}
+		-bench_ifu_icache_parity_inj_en {parity_inj_en}
 		-msg_level debug
 		-timeout	500000
 		-stake_skip 1
@@ -160,6 +231,7 @@ def	gen_opt(**kwargs):
 		-bench_axi4_min_response_delay 		 {axi4_min_response_delay}
 		-bench_axi4_max_response_delay     {axi4_max_response_delay}
 		-bench_ifu_itlb_invalidate_inj_en {itlb_invalidate_inj_en}
+		-bench_ifu_icache_parity_inj_en {parity_inj_en}
 		-timeout	8000000
 		-stepfile_skip 0 
 		-stake_skip 1
@@ -169,7 +241,10 @@ def	gen_opt(**kwargs):
 	#generate opt file
 	with open(fullpath+optname,"w") as f:
 		if num_threads==1:
-			print(mstr,file=f)
+			if arch=='rv64':
+				print(mstr,file=f)
+			else:
+				print(mstr_rv32_uvm,file=f)
 		else:
 			print(mstr_mt,file=f)
 
@@ -182,6 +257,17 @@ def	gen_opt(**kwargs):
 	#useful when a ST test needs to be tried as MT
 	with open(fullpath+optname_mt,"w") as f:
 			print(mstr_mt,file=f)
+
+
+	#for rv32 generate tblite and gatesim opfiles
+	if arch=="rv32":
+		with open(fullpath+optname_tblite,"w") as f:
+			print(mstr_rv32_tblite,file=f)
+		with open(fullpath+optname_gatesim,"w") as f:
+			print(mstr_rv32_gate,file=f)
+		with open(fullpath+optname_uvm,"w") as f:
+			print(mstr_rv32_uvm,file=f)
+			print(addon,file=f)
 
 	mstr1 = f"-opt {optname}\n"
 	return mstr1
