@@ -12,11 +12,12 @@ def gen_test(**kwargs):
 	suffix = kwargs['suffix_asm']
 	pagingmode = kwargs['pagingmode']
 	arch = kwargs.get("arch","rv64") #arch = rv64 if not specified
+	gsim = kwargs.get("gsim",0)
 	mstr += preamble.get_preamble(arch=arch)
 	if arch=="rv64":
-		tstr, nopreamble = sequences.gen_sequences(pagingmode=pagingmode) #some skeletons do not need a preamble
+		tstr, nopreamble = sequences.gen_sequences(**kwargs) #some skeletons do not need a preamble
 	else:
-		tstr, nopreamble = rv32sequences.gen_sequences(pagingmode=pagingmode) #some skeletons do not need a preamble
+		tstr, nopreamble = rv32sequences.gen_sequences(**kwargs) #some skeletons do not need a preamble
 
 	if nopreamble:
 		mstr = tstr

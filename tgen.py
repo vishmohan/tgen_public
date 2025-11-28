@@ -8,7 +8,7 @@ import gen_opt
 import os
 
 def getargs():
-	options, remainder = getopt.getopt(sys.argv[1:],'',['count=','threads=','pagingmode=','arch='])
+	options, remainder = getopt.getopt(sys.argv[1:],'',['count=','threads=','pagingmode=','arch=','gsim='])
 	opt_arg = {}
 	for opt,arg in options:
 		if opt=='--count':
@@ -19,6 +19,8 @@ def getargs():
 			opt_arg["pagingmode"]=arg
 		elif opt=='--arch':
 			opt_arg["arch"]=arg
+		elif opt=='--gsim':
+			opt_arg["gsim"]=int(arg)
 
 	return opt_arg
 
@@ -32,6 +34,7 @@ def main():
 	tcount = switches['count'] if 'count' in switches else 1
 	num_threads = switches['threads'] if 'threads' in switches else 1
 	pagingmode = switches['pagingmode'] if 'pagingmode' in switches else "sv57"
+	gsim = switches['gsim'] if 'gsim' in switches else 0
 	arch = switches["arch"] if 'arch' in switches else 'rv64'
 	if arch=="rv32":
 		pagingmode = "sv32"
@@ -63,6 +66,9 @@ def main():
 		testargs['pagingmode']= pagingmode
 		testargs['arch']=arch
 		testargs['num_threads']=num_threads
+		testargs['gsim']= gsim
+		if testargs['gsim']==1:
+			print("GATESIM"*10)
 
 		#old
 		#gen_test.gen_test(fname=fname,suffix=suffix_asm,fullpath=fullpath,pagingmode=pagingmode,arch=arch)

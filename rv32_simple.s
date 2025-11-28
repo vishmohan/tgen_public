@@ -1,3 +1,4 @@
+
 .equ	BIT_MFC0_ICACHE_FLUSH, 19
 .equ	BIT_MFC0_DISABLE_BPRED, 3
 
@@ -79,6 +80,7 @@ _start:
 _pass1:
     li      t0, 0xd0580000
     addi    t1, x0, 0xff
+		#do_eot_checks
     sb      t1, 0(t0)
     fence.i
     beq     x0, x0, _pass1
@@ -89,6 +91,7 @@ _fail1:
     fence.i
     beq     x0, x0, _fail1
 
+#.include "eot_checks.h"
 
 
 #{.code1:0x80000000}

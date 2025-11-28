@@ -114,13 +114,27 @@ def	gen_opt(**kwargs):
 		if ras_ovrd:
 			config_str += ras_ovrd_str
 
+	if arch=="rv32":
+		mstr_arch = "rv32"
+		mstr_flags = "rv32gcv_zba_zbb_zbc_zbs_svinval"
+		mstr_cfg_shasta = "rv32_alp120"
+		mstr_cfg_ovrd = "MAILBOX_ADDR=0xd0580000,RV_COMPILE_SFX_MEM=True"
+		mstr_turlock = "turlock_aia"
+		mstr_gate_ovrd = "GATE_SIM=1,SIGNAL_GATE=1,GATE_SIM_WRAPPER=1,SF_GATE_SIM=1,MAILBOX_ADDR=0xd0580000"
+	else:
+		mstr_arch = 		"rv64"
+		mstr_flags = 		"rv64gcv_zba_zbb_zbc_zbs_svinval"
+		mstr_cfg_shasta = "rv64_alp5100"
+		mstr_cfg_ovrd = "MAILBOX_ADDR=0x8d0580000,RV_COMPILE_SFX_MEM=True"
+		mstr_turlock = 	"turlock_aia"
+		mstr_gate_ovrd = "GATE_SIM=1,SIGNAL_GATE=1,GATE_SIM_WRAPPER=1,SF_GATE_SIM=1,MAILBOX_ADDR=0x8d0580000"
 
-	mstr_rv32_uvm = f'''
--arch rv32
--march rv32gcv_zba_zbb_zbc_zbs_svinval
--config_shasta=rv32_alp120
--config_ovr MAILBOX_ADDR=0xd0580000,RV_COMPILE_SFX_MEM=True
--config_turlock=turlock_aia
+	mstr_rv_uvm = f'''
+-arch {mstr_arch}
+-march {mstr_flags}
+-config_shasta {mstr_cfg_shasta}
+-config_ovr {mstr_cfg_ovrd}
+-config_turlock {mstr_turlock}
 -gate_sim=0
 -harts=1
 -maxinstr=50000
@@ -133,36 +147,23 @@ def	gen_opt(**kwargs):
 -ld_file {lsrc}
 	'''	
 
-	mstr_rv32_tblite = f'''
--arch rv32
--march rv32gcv_zba_zbb_zbc_zbs_svinval
--config_shasta=rv32_alp120
--config_ovr MAILBOX_ADDR=0xd0580000,RV_COMPILE_SFX_MEM=True
--config_turlock=turlock_aia
--gate_sim=0
--harts=1
--maxinstr=50000
--shadow_skip=1
--stepfile_skip=1
--stake_skip=1
--tblite_trc_en=1
--test {src}
--timeout=500000
--ld_file {lsrc}
+	mstr_rv_tblite_addon = f'''
 -tb_lite=1
 -tb_lite_vip=1
 -console_check "TEST PASSED"
 	'''	
 
+	mstr_rv_tblite = mstr_rv_uvm + mstr_rv_tblite_addon
+
 	#for gatesim tests after adding eot_checks
 	addon = '-console_check "TEST PASSED"'
 
-	mstr_rv32_gate = f'''
--arch=rv32
--march rv32gcv_zba_zbb_zbc_zbs_svinval
--config_shasta=rv32_alp120
--config_ovr GATE_SIM=1,SIGNAL_GATE=1,GATE_SIM_WRAPPER=1,SF_GATE_SIM=1,MAILBOX_ADDR=0xd0580000
--config_turlock=turlock_aia
+	mstr_rv_gate = f'''
+-arch {mstr_arch}
+-march {mstr_flags}
+-config_shasta {mstr_cfg_shasta}
+-config_ovr {mstr_gate_ovrd}
+-config_turlock {mstr_turlock}
 -gate_sim=1
 -harts=1
 -maxinstr=100000
@@ -244,7 +245,7 @@ def	gen_opt(**kwargs):
 			if arch=='rv64':
 				print(mstr,file=f)
 			else:
-				print(mstr_rv32_uvm,file=f)
+				print(mstr_rv_uvm,file=f)
 		else:
 			print(mstr_mt,file=f)
 
@@ -259,15 +260,14 @@ def	gen_opt(**kwargs):
 			print(mstr_mt,file=f)
 
 
-	#for rv32 generate tblite and gatesim opfiles
-	if arch=="rv32":
-		with open(fullpath+optname_tblite,"w") as f:
-			print(mstr_rv32_tblite,file=f)
-		with open(fullpath+optname_gatesim,"w") as f:
-			print(mstr_rv32_gate,file=f)
-		with open(fullpath+optname_uvm,"w") as f:
-			print(mstr_rv32_uvm,file=f)
-			print(addon,file=f)
+	#for rv32/rv64 generate tblite and gatesim opfiles
+	with open(fullpath+optname_tblite,"w") as f:
+		print(mstr_rv_tblite,file=f)
+	with open(fullpath+optname_gatesim,"w") as f:
+		print(mstr_rv_gate,file=f)
+	with open(fullpath+optname_uvm,"w") as f:
+		print(mstr_rv_uvm,file=f)
+		print(addon,file=f)
 
 	mstr1 = f"-opt {optname}\n"
 	return mstr1
