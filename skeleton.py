@@ -27,6 +27,7 @@ def get_skeleton(**kwargs):
 	nopreamble_skeletons = ["b5489_2.s", "b5489_3.s", "b5489_4.s", "b5489_5.s", "b5489_6.s","b5489_7.s","b5489_8.s"]
 	nopreamble_skeletons.append("rv32_simple.s")
 	nopreamble_skeletons.append("rv64_alp5100_gate.s")
+	nopreamble_skeletons.append("rv64_alp1200_gate.s")
 	nopreamble = 0
 
 	#sv57 templates
@@ -65,6 +66,7 @@ def get_skeleton(**kwargs):
 	templates_sv48.append("b5489_7.s")
 	templates_sv48.append("b5489_8.s")
 	templates_sv48.append("rv64_alp5100_gate.s")
+	templates_sv48.append("rv64_alp1200_gate.s")
 
 	#templates_sv48 = ["b5489_2.s","b5489_3.s","b5489_4.s","b5489_5.s","b5489_6.s","b5489_7.s","b5489_8.s"]
 	#templates_sv48.append("rv64_sv48_4k.s")
@@ -76,10 +78,12 @@ def get_skeleton(**kwargs):
 	
 	templates_sv32 = ["rv32_simple.s"]
 	templates_gsim_sv48 = ["rv64_alp5100_gate.s"]
+	templates_gsim_sv48_mt = ["rv64_alp1200_gate.s"]
 
 
 	pagingmode = kwargs['pagingmode']
 	gsim = kwargs['gsim']
+	num_threads = kwargs['num_threads']
 
 	if pagingmode == "sv48":
 		mname = random.choice(templates_sv48)
@@ -89,8 +93,11 @@ def get_skeleton(**kwargs):
 	if pagingmode == "sv32":
 		mname = random.choice(templates_sv32)
 
-	if gsim==1 and pagingmode=="sv48":
+	if gsim==1 and pagingmode=="sv48" and num_threads==1:
 		mname = random.choice(templates_gsim_sv48)
+
+	if gsim==1 and pagingmode=="sv48" and num_threads>1:
+		mname = random.choice(templates_gsim_sv48_mt)
 
 	#if chosen skeleton does not require preamble set flag 
 	if mname in nopreamble_skeletons:

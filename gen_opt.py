@@ -124,9 +124,13 @@ def	gen_opt(**kwargs):
 	else:
 		mstr_arch = 		"rv64"
 		mstr_flags = 		"rv64gcv_zba_zbb_zbc_zbs_svinval"
-		mstr_cfg_shasta = "rv64_alp5100"
+		if num_threads > 1:
+			mstr_cfg_shasta = "rv64_alp1200"
+			mstr_turlock = 	"turlock_mt"
+		else:
+			mstr_cfg_shasta = "rv64_alp5100"
+			mstr_turlock = 	"turlock_aia"
 		mstr_cfg_ovrd = "MAILBOX_ADDR=0x8d0580000,RV_COMPILE_SFX_MEM=True"
-		mstr_turlock = 	"turlock_aia"
 		mstr_gate_ovrd = "GATE_SIM=1,SIGNAL_GATE=1,GATE_SIM_WRAPPER=1,SF_GATE_SIM=1,MAILBOX_ADDR=0x8d0580000"
 
 	mstr_rv_uvm = f'''
@@ -135,8 +139,9 @@ def	gen_opt(**kwargs):
 -config_shasta {mstr_cfg_shasta}
 -config_ovr {mstr_cfg_ovrd}
 -config_turlock {mstr_turlock}
+-bench_dec_num_threads {num_threads}
 -gate_sim=0
--harts=1
+-harts={num_threads}
 -maxinstr=50000
 -shadow_skip=1
 -stepfile_skip=1
@@ -150,6 +155,7 @@ def	gen_opt(**kwargs):
 	mstr_rv_tblite_addon = f'''
 -tb_lite=1
 -tb_lite_vip=1
+-bench_dec_mrac_cache_en 0
 -console_check "TEST PASSED"
 	'''	
 
@@ -164,8 +170,9 @@ def	gen_opt(**kwargs):
 -config_shasta {mstr_cfg_shasta}
 -config_ovr {mstr_gate_ovrd}
 -config_turlock {mstr_turlock}
+-bench_dec_num_threads {num_threads}
 -gate_sim=1
--harts=1
+-harts={num_threads}
 -maxinstr=100000
 -shadow_skip=1
 -stepfile_skip=1

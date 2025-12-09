@@ -171,7 +171,7 @@ test_begin:
 	li		x2, 1
 	csrr  x1, mhartid
 	beqz  x1, 		continue_test_t0
-	beq   x1, x2, continue_test_t1
+	#beq   x1, x2, continue_test_t1
 	#li		x2, 2
 	#beq   x1, x2, continue_test_t2
 
@@ -267,7 +267,7 @@ mmodehndlr_begin:
 .section .code1 , "aw"
 code1t0_begin:
 	lui		x12, 1
-	lui		x15, 2
+	lui		x15, 3
 .rept 10
 	li		x31, 0x2
 	j			1f
@@ -285,8 +285,6 @@ code1t0_begin:
 		vse8.v		v0, (x15)
 		vle8.v		v1, (x15)
 		vadd.vi		v1, v1, 1
-		vse8.v		v1, (x12)
-		vle8.v		v0, (x12)
 	.endr
 		addi x31, x31, -1
 		bgtz x31, 2b
@@ -393,8 +391,8 @@ code_common_begin:
 	csrw sepc, x22
 	sret
 
-#{.mdata: 0x1000}
-#{.mdata:0x1000:0x1000}
+#{.mdata: 0x3000}
+#{.mdata:0x3000:0x3000}
 .section .mdata, "aw"
 	.fill 4096, 1, 0
 
