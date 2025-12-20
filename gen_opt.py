@@ -37,10 +37,13 @@ def	gen_opt(**kwargs):
 
 
 	config_str = f'{paging_mode_str}RV_BUILD_SVADU=True'#,RV_BTB2_ENABLE=1'
+	config_str = f'{paging_mode_str}RV_BUILD_SVADU=True,RV_COMPILE_SFX_MEM=True' #FIXME temp hack for SFX
 	config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV_BUILD_SMRNMI=False'
+	config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV_BUILD_SMRNMI=False,RV_COMPILE_SFX_MEM=True' #FIXME temp hack for SFX
 	way_predictor = random.choice(["True","False"])
 	ifu_prefetch = random.choice(["True","False"])
 	#config_str_mt += f',RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
+	xprop = 1 #FIXME temp hack for SFX
 
 	#injector specific options
 	#disable btb hit
@@ -53,6 +56,7 @@ def	gen_opt(**kwargs):
 	itlb_invalidate_inj_en = random.randint(0,1)
 	#parity injector
 	parity_inj_en = random.randint(0,1)
+	parity_inj_en = 0 #FIXME temp hack for SFX
 
 	#axi response delay
 	long_delay = random.uniform(0,1)
@@ -214,6 +218,7 @@ def	gen_opt(**kwargs):
 		-msg_level debug
 		-timeout	500000
 		-stake_skip 1
+		-xprop {xprop}
 		'''
 	mstr_mt = f'''
 		-test {src}
@@ -244,6 +249,7 @@ def	gen_opt(**kwargs):
 		-timeout	8000000
 		-stepfile_skip 0 
 		-stake_skip 1
+		-xprop {xprop}
 		'''
 		#-bench_dec_mrac_cache_en    0
 		#-bench_dec_mrac							0x55555555

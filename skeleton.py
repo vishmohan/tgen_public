@@ -28,6 +28,7 @@ def get_skeleton(**kwargs):
 	nopreamble_skeletons.append("rv32_simple.s")
 	nopreamble_skeletons.append("rv64_alp5100_gate.s")
 	nopreamble_skeletons.append("rv64_alp1200_gate.s")
+	nopreamble_skeletons.append("missbuffer1.s")
 	nopreamble = 0
 
 	#sv57 templates
@@ -67,6 +68,7 @@ def get_skeleton(**kwargs):
 	templates_sv48.append("b5489_8.s")
 	templates_sv48.append("rv64_alp5100_gate.s")
 	templates_sv48.append("rv64_alp1200_gate.s")
+	templates_sv48.append("missbuffer1.s")
 
 	#templates_sv48 = ["b5489_2.s","b5489_3.s","b5489_4.s","b5489_5.s","b5489_6.s","b5489_7.s","b5489_8.s"]
 	#templates_sv48.append("rv64_sv48_4k.s")
