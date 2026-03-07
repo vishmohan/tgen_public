@@ -15,6 +15,7 @@ def	gen_opt(**kwargs):
 	num_threads = kwargs['num_threads']
 	pagingmode = kwargs['pagingmode']
 	arch = kwargs['arch']
+	verbosity="none"
 
 	src = fname + suffix_asm
 	lsrc = fname + suffix_linker
@@ -30,20 +31,22 @@ def	gen_opt(**kwargs):
 	if pagingmode== "sv57":
 		paging_mode_str = "RV64_VA_SIZE=57,"
 
-	#myconfig_st = random.choice(["rv64_release_qh","rv64_alp5100","rv64_alp5200"]) #for ST
-	#myconfig_st = random.choice(["rv64_release_qh"]) #for ST
-	myconfig_st = random.choice(["rv64_alp5100"]) #for ST
-
+	myconfig_st = random.choice(["rv64_alp5100","rv64_alp5200"]) #for ST
+	chosen_turlock_config = "turlock_aia" #default for ST 5100/5200
 
 
 	config_str = f'{paging_mode_str}RV_BUILD_SVADU=True'#,RV_BTB2_ENABLE=1'
-	config_str = f'{paging_mode_str}RV_BUILD_SVADU=True,RV_COMPILE_SFX_MEM=True' #FIXME temp hack for SFX
 	config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV_BUILD_SMRNMI=False'
-	config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV_BUILD_SMRNMI=False,RV_COMPILE_SFX_MEM=True' #FIXME temp hack for SFX
 	way_predictor = random.choice(["True","False"])
 	ifu_prefetch = random.choice(["True","False"])
-	#config_str_mt += f',RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
-	xprop = 1 #FIXME temp hack for SFX
+	config_str_mt += f',RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
+	xprop = 0 
+
+	myconfig_mt = "rv64_alp1200"
+	mt_ooo = False
+	if mt_ooo:
+		myconfig_mt = random.choice(["rv64_qh_perf_mt", "rv64_alp5100_mt"])
+		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False'
 
 	#injector specific options
 	#disable btb hit
@@ -56,7 +59,6 @@ def	gen_opt(**kwargs):
 	itlb_invalidate_inj_en = random.randint(0,1)
 	#parity injector
 	parity_inj_en = random.randint(0,1)
-	parity_inj_en = 0 #FIXME temp hack for SFX
 
 	#axi response delay
 	long_delay = random.uniform(0,1)
@@ -70,11 +72,10 @@ def	gen_opt(**kwargs):
 		axi4_min_response_delay = random.randint(150,200)
 		axi4_max_response_delay = random.randint(300,400)
 
-	myconfig_mt = "rv64_alp1200"
-	mt_ooo = False
-	if mt_ooo:
-		myconfig_mt = "rv64_qh_perf_mt"
-		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False'
+
+	#error response
+	axi4_ifu_enable_response_weight=random.randint(0,1)
+
 	
 
 	#btb ovrd params
@@ -102,8 +103,13 @@ def	gen_opt(**kwargs):
 	btb_ovrd_str = f',RV_BTB2_ENABLE={rv_btb2_enable},RV_BTB_SIZE={rv_btb_size},RV_INST_FETCH_WIDTH={rv_inst_fetch_width},RV_BTB2_ARRAY_DEPTH={rv_btb2_array_depth},RV_BTB2_BTAG_SIZE={rv_btb2_tag_size}'
 	tage_ovrd_str = f',TAGE_ENABLE={tage_enable},TAGE_RAM_ENABLE={tage_ram_enable},TAGE_ENTRIES={tage_entries},TAGE_TABLES={tage_tables},TAGE_HISTORY_SIZE={tage_history_size},TAGE_CACHE_ENTRIES={tage_cache_entries},TAGE_CACHE_WAY={tage_cache_way}'
 	ras_ovrd_str = f',RAS_ENABLE={ras_enable},RAS_DEPTH={ras_depth}'
+	icache_tag_flop_disable_str = f',IFU_IC_TAG_FLOP_EN=False'
 
-	enable_overrides = False
+	enable_overrides = 0 #random.randint(0,1)
+	
+	icache_tag_flop_disable = random.randint(0,1)
+	if icache_tag_flop_disable:
+		config_str += icache_tag_flop_disable_str
 
 	if enable_overrides:
 		btb_ovrd = random.randint(0,1)
@@ -117,6 +123,10 @@ def	gen_opt(**kwargs):
 		ras_ovrd = random.randint(0,1)
 		if ras_ovrd:
 			config_str += ras_ovrd_str
+
+		icache_tag_flop_disable = random.randint(0,1)
+		if icache_tag_flop_disable:
+			config_str += icache_tag_flop_disable_str
 
 	if arch=="rv32":
 		mstr_arch = "rv32"
@@ -191,13 +201,14 @@ def	gen_opt(**kwargs):
 -console_check "TEST PASSED"
 	'''
 
+	
 	mstr = f'''
 		-test {src}
 		-arch rv64
 		-march rv64gcv_zbs
 		-config {myconfig_st}
 		-config_shasta {myconfig_st}
-		-config_turlock turlock_aia
+		-config_turlock {chosen_turlock_config}
 		-config_ovr_shasta "{config_str}"
 		-maxinstr 550000
 		-ld_file {lsrc}
@@ -212,10 +223,11 @@ def	gen_opt(**kwargs):
 		-bench_ifu_dec_avail_inj_max_delay {dec_avail_inj_max_delay}
 		-bench_axi4_min_response_delay 		 {axi4_min_response_delay}
 		-bench_axi4_max_response_delay     {axi4_max_response_delay}
+		-bench_axi4_ifu_enable_response_weight {axi4_ifu_enable_response_weight}
 		-bench_ifu_disable_btb_hit {disable_btb_hit}
 		-bench_ifu_itlb_invalidate_inj_en {itlb_invalidate_inj_en}
 		-bench_ifu_icache_parity_inj_en {parity_inj_en}
-		-msg_level debug
+		-msg_level {verbosity}
 		-timeout	500000
 		-stake_skip 1
 		-xprop {xprop}
@@ -230,11 +242,11 @@ def	gen_opt(**kwargs):
 		-bench_dec_num_threads {mt_num_threads}
 		-bench_mmu_checker_disable  1
 		-harts {mt_num_threads}
-		-maxinstr 550000
+		-maxinstr 50000
 		-ld_file {lsrc}
 		-shadow_tracePTE 1
 		-tracePTE 1 
-		-msg_level debug
+		-msg_level {verbosity}
 		-bench_ifu_fetch_delay 40
 		-bench_core_fe_timeout 250000
 		-bench_core_be_timeout 250000
@@ -244,6 +256,7 @@ def	gen_opt(**kwargs):
 		-bench_ifu_dec_avail_inj_max_delay {dec_avail_inj_max_delay}
 		-bench_axi4_min_response_delay 		 {axi4_min_response_delay}
 		-bench_axi4_max_response_delay     {axi4_max_response_delay}
+		-bench_axi4_ifu_enable_response_weight {axi4_ifu_enable_response_weight}
 		-bench_ifu_itlb_invalidate_inj_en {itlb_invalidate_inj_en}
 		-bench_ifu_icache_parity_inj_en {parity_inj_en}
 		-timeout	8000000

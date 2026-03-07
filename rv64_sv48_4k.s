@@ -90,8 +90,8 @@ _handler:
 		csrr		x1, mcause
 		csrr		x1, mepc
 		csrr		x1, mtval
-		csrr		x1, mtval2
-		csrr		x1, mtinst
+		#csrr		x1, mtval2
+		#csrr		x1, mtinst
 		csrr	  x1, sscratch
 		ret
 .align 4
