@@ -32,6 +32,7 @@ def	gen_opt(**kwargs):
 		paging_mode_str = "RV64_VA_SIZE=57,"
 
 	myconfig_st = random.choice(["rv64_alp5100","rv64_alp5200"]) #for ST
+	myconfig_st = "rv64_alp5100" #FIXME force 5100 for decouple fetchfor ST
 	chosen_turlock_config = "turlock_aia" #default for ST 5100/5200
 
 
@@ -43,10 +44,16 @@ def	gen_opt(**kwargs):
 	xprop = 0 
 
 	myconfig_mt = "rv64_alp1200"
-	mt_ooo = False
+	mt_ooo = True
 	if mt_ooo:
 		myconfig_mt = random.choice(["rv64_qh_perf_mt", "rv64_alp5100_mt"])
+		myconfig_mt = "rv64_alp5100_mt"
 		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False'
+
+
+	decouple_fetch = True #FIXME for decouple fetch testing
+	if decouple_fetch:
+		config_str = f'{paging_mode_str}RV_BUILD_SVADU=True,DECOUPLE_FETCH=True,FTQ_ENTRIES=8'#,RV_BTB2_ENABLE=1'
 
 	#injector specific options
 	#disable btb hit
@@ -59,6 +66,12 @@ def	gen_opt(**kwargs):
 	itlb_invalidate_inj_en = random.randint(0,1)
 	#parity injector
 	parity_inj_en = random.randint(0,1)
+	#bigtage bank collision
+	ifu_BigTage_collision_inj_en = random.randint(0,1)
+
+	#HACK FOR DECOUPLE FETCh FIXME
+	disable_btb_hit = dec_avail_inj_en = itlb_invalidate_inj_en = parity_inj_en = ifu_BigTage_collision_inj_en = 0
+	
 
 	#axi response delay
 	long_delay = random.uniform(0,1)
@@ -215,7 +228,7 @@ def	gen_opt(**kwargs):
 		-shadow_tracePTE 1
 		-tracePTE  1 
 		-bench_mmu_checker_disable  1
-		-bench_ifu_BigTage_collision_inj_en 1
+		-bench_ifu_BigTage_collision_inj_en {ifu_BigTage_collision_inj_en}
 		-bench_ifu_BigTage_collision_inj_min_delay 100
 		-bench_ifu_BigTage_collision_inj_max_delay 500
 		-bench_ifu_dec_avail_inj_en 			 {dec_avail_inj_en}
@@ -259,7 +272,7 @@ def	gen_opt(**kwargs):
 		-bench_axi4_ifu_enable_response_weight {axi4_ifu_enable_response_weight}
 		-bench_ifu_itlb_invalidate_inj_en {itlb_invalidate_inj_en}
 		-bench_ifu_icache_parity_inj_en {parity_inj_en}
-		-timeout	8000000
+		-timeout	800000
 		-stepfile_skip 0 
 		-stake_skip 1
 		-xprop {xprop}
