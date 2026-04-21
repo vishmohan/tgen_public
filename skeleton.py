@@ -30,6 +30,7 @@ def get_skeleton(**kwargs):
 	nopreamble_skeletons.append("rv64_alp1200_gate.s")
 	nopreamble_skeletons.append("missbuffer1.s")
 	nopreamble_skeletons.append("rv64_sv48_jal_to_nonspec.s")
+	nopreamble_skeletons.append("rv64_sv48_jal_to_nonspec1.s")
 	nopreamble = 0
 
 	#sv57 templates
@@ -71,6 +72,7 @@ def get_skeleton(**kwargs):
 	templates_sv48.append("rv64_alp1200_gate.s")
 	templates_sv48.append("missbuffer1.s")
 	templates_sv48.append("rv64_sv48_jal_to_nonspec.s")
+	templates_sv48.append("rv64_sv48_jal_to_nonspec1.s")
 
 
 	#templates_sv48 = ["rv64_sv48_4k.s", "rv64_sv48_4k_1.s"] #FIXME HACK FOR qh_perf_mt mt_ooo
