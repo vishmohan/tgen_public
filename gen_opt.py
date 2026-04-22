@@ -48,7 +48,7 @@ def	gen_opt(**kwargs):
 	if mt_ooo:
 		myconfig_mt = random.choice(["rv64_qh_perf_mt", "rv64_alp5100_mt"])
 		myconfig_mt = "rv64_alp5100_mt"
-		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False'
+		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False,RV_BUILD_VEU=1'
 
 
 	decouple_fetch = True #FIXME for decouple fetch testing
