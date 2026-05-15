@@ -16,6 +16,9 @@ def	gen_opt(**kwargs):
 	pagingmode = kwargs['pagingmode']
 	arch = kwargs['arch']
 	verbosity="none"
+	timeout=1000000
+	fe_timeout=250000
+	be_timeout=250000
 
 	src = fname + suffix_asm
 	lsrc = fname + suffix_linker
@@ -32,12 +35,11 @@ def	gen_opt(**kwargs):
 		paging_mode_str = "RV64_VA_SIZE=57,"
 
 	myconfig_st = random.choice(["rv64_alp5100","rv64_alp5200"]) #for ST
-	myconfig_st = "rv64_alp5100" #FIXME force 5100 for decouple fetchfor ST
 	chosen_turlock_config = "turlock_aia" #default for ST 5100/5200
 
 
-	config_str = f'{paging_mode_str}RV_BUILD_SVADU=True'#,RV_BTB2_ENABLE=1'
-	config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV_BUILD_SMRNMI=False'
+	config_str = f'{paging_mode_str}RV_BUILD_SVADU=True,MMU_IGNORE_PTE_ADU_ENABLE=True'#,RV_BTB2_ENABLE=1'
+	config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV_BUILD_SMRNMI=False,MMU_IGNORE_PTE_ADU_ENABLE=True'
 	way_predictor = random.choice(["True","False"])
 	ifu_prefetch = random.choice(["True","False"])
 	config_str_mt += f',RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
@@ -48,13 +50,13 @@ def	gen_opt(**kwargs):
 	if mt_ooo:
 		myconfig_mt = random.choice(["rv64_qh_perf_mt", "rv64_alp5100_mt"])
 		myconfig_mt = "rv64_alp5100_mt"
-		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False,RV_BUILD_VEU=1'
+		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False,RV_BUILD_VEU=1,MMU_IGNORE_PTE_ADU_ENABLE=True'
 
 
-	decouple_fetch = True #FIXME for decouple fetch testing
+	decouple_fetch = True #FIXME for decouple fetch testing supported in both 5100 and 5200
 	if decouple_fetch:
-		config_str = f'{paging_mode_str}RV_BUILD_SVADU=True,DECOUPLE_FETCH=True,FTQ_ENTRIES=8'#,RV_BTB2_ENABLE=1'
-
+		config_str = f'{paging_mode_str}RV_BUILD_SVADU=True,DECOUPLE_FETCH=True,FTQ_ENTRIES=8,MMU_IGNORE_PTE_ADU_ENABLE=True'#,RV_BTB2_ENABLE=1'
+	
 	#injector specific options
 	#disable btb hit
 	disable_btb_hit = random.randint(0,1)
@@ -241,7 +243,9 @@ def	gen_opt(**kwargs):
 		-bench_ifu_itlb_invalidate_inj_en {itlb_invalidate_inj_en}
 		-bench_ifu_icache_parity_inj_en {parity_inj_en}
 		-msg_level {verbosity}
-		-timeout	500000
+		-timeout	{timeout}
+		-bench_core_fe_timeout {fe_timeout}
+		-bench_core_be_timeout {be_timeout}
 		-stake_skip 1
 		-xprop {xprop}
 		'''
@@ -261,9 +265,6 @@ def	gen_opt(**kwargs):
 		-tracePTE 1 
 		-msg_level {verbosity}
 		-bench_ifu_fetch_delay 40
-		-bench_core_fe_timeout 250000
-		-bench_core_be_timeout 250000
-		-bench_core_ldst_op_timeout 1500000
 		-bench_ifu_dec_avail_inj_en 			 {dec_avail_inj_en}
 		-bench_ifu_dec_avail_inj_min_delay {dec_avail_inj_min_delay}
 		-bench_ifu_dec_avail_inj_max_delay {dec_avail_inj_max_delay}
@@ -272,7 +273,11 @@ def	gen_opt(**kwargs):
 		-bench_axi4_ifu_enable_response_weight {axi4_ifu_enable_response_weight}
 		-bench_ifu_itlb_invalidate_inj_en {itlb_invalidate_inj_en}
 		-bench_ifu_icache_parity_inj_en {parity_inj_en}
-		-timeout	800000
+		-msg_level {verbosity}
+		-timeout	{timeout}
+		-bench_core_fe_timeout {fe_timeout}
+		-bench_core_be_timeout {be_timeout}
+		-bench_core_ldst_op_timeout 1500000
 		-stepfile_skip 0 
 		-stake_skip 1
 		-xprop {xprop}

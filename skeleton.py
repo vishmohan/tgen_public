@@ -73,17 +73,12 @@ def get_skeleton(**kwargs):
 	templates_sv48.append("missbuffer1.s")
 	templates_sv48.append("rv64_sv48_jal_to_nonspec.s")
 	templates_sv48.append("rv64_sv48_jal_to_nonspec1.s")
+	templates_sv48.append("rv64_sv48_branchaliasing.s")
+	templates_sv48.append("rv64_sv48_branchaliasing_magicmask.s")
+	templates_sv48.append("rv64_sv48_branchaliasing_magicmask1.s")
+	#templates_sv48 = ["rv64_sv48_branchaliasing_magicmask1.s"]
 
 
-	#templates_sv48 = ["rv64_sv48_4k.s", "rv64_sv48_4k_1.s"] #FIXME HACK FOR qh_perf_mt mt_ooo
-	#templates_sv48 = ["b5489_2.s","b5489_3.s","b5489_4.s","b5489_5.s","b5489_6.s","b5489_7.s","b5489_8.s"]
-	#templates_sv48.append("rv64_sv48_4k.s")
-	#templates_sv48.append("rv64_sv48_4k_1.s")
-	#templates_sv48.append("rv64_sv48_vector.s")
-	#templates_sv48.append("rv64_sv48_vector_1.s")
-	#templates_sv48.append("rv64_sv48_vector_2.s")
-
-	
 	templates_sv32 = ["rv32_simple.s"]
 	templates_gsim_sv48 = ["rv64_alp5100_gate.s"]
 	templates_gsim_sv48_mt = ["rv64_alp1200_gate.s"]

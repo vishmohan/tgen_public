@@ -506,7 +506,7 @@ code_common_begin:
 #pml4
 #{.ptl5:0x140000000}
 .section .ptl5, "aw"
-	make_nonleaf_pte_entry 0x140001 0x31
+	make_nonleaf_pte_entry 0x140001 0x21
 
 
 #pdpt
