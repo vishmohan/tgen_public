@@ -53,7 +53,7 @@ def	gen_opt(**kwargs):
 		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False,RV_BUILD_VEU=1,MMU_IGNORE_PTE_ADU_ENABLE=True'
 
 
-	decouple_fetch = True #FIXME for decouple fetch testing supported in both 5100 and 5200
+	decouple_fetch = False #FIXME for decouple fetch testing supported in both 5100 and 5200
 	if decouple_fetch:
 		config_str = f'{paging_mode_str}RV_BUILD_SVADU=True,DECOUPLE_FETCH=True,FTQ_ENTRIES=8,MMU_IGNORE_PTE_ADU_ENABLE=True'#,RV_BTB2_ENABLE=1'
 	
@@ -90,6 +90,7 @@ def	gen_opt(**kwargs):
 
 	#error response
 	axi4_ifu_enable_response_weight=random.randint(0,1)
+	axi4_ifu_enable_response_weight=0 #FIXME Hack
 
 	
 
