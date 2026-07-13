@@ -35,6 +35,7 @@ def	gen_opt(**kwargs):
 		paging_mode_str = "RV64_VA_SIZE=57,"
 
 	myconfig_st = random.choice(["rv64_alp5100","rv64_alp5200"]) #for ST
+	#myconfig_st = "rv64_alp5200" #FIXME force 5200 ST
 	chosen_turlock_config = "turlock_aia" #default for ST 5100/5200
 
 
@@ -53,7 +54,8 @@ def	gen_opt(**kwargs):
 		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False,RV_BUILD_VEU=1,MMU_IGNORE_PTE_ADU_ENABLE=True'
 
 
-	decouple_fetch = False #FIXME for decouple fetch testing supported in both 5100 and 5200
+	decouple_fetch = True #FIXME for decouple fetch testing supported in both 5100 and 5200
+	decouple_fetch = False
 	if decouple_fetch:
 		config_str = f'{paging_mode_str}RV_BUILD_SVADU=True,DECOUPLE_FETCH=True,FTQ_ENTRIES=8,MMU_IGNORE_PTE_ADU_ENABLE=True'#,RV_BTB2_ENABLE=1'
 	
@@ -73,6 +75,7 @@ def	gen_opt(**kwargs):
 
 	#HACK FOR DECOUPLE FETCh FIXME
 	disable_btb_hit = dec_avail_inj_en = itlb_invalidate_inj_en = parity_inj_en = ifu_BigTage_collision_inj_en = 0
+	disable_btb_hit = random.randint(0,1)
 	
 
 	#axi response delay
