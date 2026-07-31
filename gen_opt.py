@@ -46,22 +46,24 @@ def	gen_opt(**kwargs):
 	config_str_mt += f',RV_WAY_PREDICTOR_ENABLE={way_predictor},RV_IFU_PREFETCH_ENABLE={ifu_prefetch}' 
 	xprop = 0 
 
+	decouple_fetch = True #FIXME for decouple fetch testing supported in both 5100 and 5200
+	decouple_fetch = False
+
 	myconfig_mt = "rv64_alp1200"
 	mt_ooo = True
 	if mt_ooo:
-		myconfig_mt = random.choice(["rv64_qh_perf_mt", "rv64_alp5100_mt"])
-		myconfig_mt = "rv64_alp5100_mt"
-		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False,RV_BUILD_VEU=1,MMU_IGNORE_PTE_ADU_ENABLE=True'
+		myconfig_mt = random.choice(["rv64_alp5200_mt", "rv64_alp5100_mt"])
+		config_str_mt = f'{paging_mode_str}NUM_THREADS={mt_num_threads},RV64_PA_SIZE=39,RV_BUILD_SMRNMI=False,MMU_IGNORE_PTE_ADU_ENABLE=True,RV_BUILD_SVADU=True'
+		if decouple_fetch:
+			config_str_mt += f',DECOUPLE_FETCH=True,FTQ_ENTRIES=8'
 
 
-	decouple_fetch = True #FIXME for decouple fetch testing supported in both 5100 and 5200
-	decouple_fetch = False
 	if decouple_fetch:
 		config_str = f'{paging_mode_str}RV_BUILD_SVADU=True,DECOUPLE_FETCH=True,FTQ_ENTRIES=8,MMU_IGNORE_PTE_ADU_ENABLE=True'#,RV_BTB2_ENABLE=1'
 	
 	#injector specific options
-	#disable btb hit
-	disable_btb_hit = random.randint(0,1)
+	#disable btb hit - do not use
+	#disable_btb_hit = random.randint(0,1)
 	#dec_avail_inj parameters
 	dec_avail_inj_en = random.randint(0,1)
 	dec_avail_inj_min_delay = random.randint(8,20)
@@ -73,9 +75,8 @@ def	gen_opt(**kwargs):
 	#bigtage bank collision
 	ifu_BigTage_collision_inj_en = random.randint(0,1)
 
-	#HACK FOR DECOUPLE FETCh FIXME
+	#HACK FOR DECOUPLE FETCH FIXME
 	disable_btb_hit = dec_avail_inj_en = itlb_invalidate_inj_en = parity_inj_en = ifu_BigTage_collision_inj_en = 0
-	disable_btb_hit = random.randint(0,1)
 	
 
 	#axi response delay
