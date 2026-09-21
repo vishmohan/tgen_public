@@ -1,0 +1,70 @@
+# RISC-V Page Table Config — multiple hgatp values (multiple VMIDs)
+#
+# stage2 uses page_tables: list to generate one G-stage table per VMID.
+# Each entry gets its own 16KB root table and hgatp value.
+# Useful for testing VMID-tagged TLB behavior.
+
+stage1:
+  mode: sv39
+  page_tables:
+    - label:   guest0_proc0
+      base_pa: "0x80400000"
+      asid:    0
+      mappings:
+        - va: "0x80000000"
+          pa: same
+          size: 2MB
+          page_size: 2MB
+          attrs: {r: 1, w: 0, x: 1}
+
+    - label:   guest0_proc1
+      base_pa: "0x80410000"
+      asid:    1
+      mappings:
+        - va: "0x80000000"
+          pa: "0x80200000"
+          size: 2MB
+          page_size: 2MB
+          attrs: {r: 1, w: 0, x: 1}
+
+stage2:
+  mode: sv48
+  page_tables:
+
+    # VMID 0: guest 0 physical memory
+    - label:   vmid0
+      base_pa: "0x90010000"   # must be 16KB-aligned
+      asid:    0              # asid field = VMID in hgatp
+      mappings:
+        - va: "0x80000000"
+          pa: "0xC0000000"
+          size: 4MB
+          page_size: 2MB
+          attrs: {r: 1, w: 1, x: 1}
+        - va: "0x80400000"    # VS-stage page tables
+          pa: "0xC0400000"
+          size: 4KB
+          page_size: 4KB
+        - va: "0x80410000"
+          pa: "0xC0410000"
+          size: 4KB
+          page_size: 4KB
+
+    # VMID 1: different guest, different physical memory
+    - label:   vmid1
+      base_pa: "0x90020000"   # 16KB-aligned (0x90010000 + 0x10000)
+      asid:    1
+      mappings:
+        - va: "0x80000000"
+          pa: "0xD0000000"
+          size: 4MB
+          page_size: 2MB
+          attrs: {r: 1, w: 1, x: 1}
+        - va: "0x80400000"
+          pa: "0xD0400000"
+          size: 4KB
+          page_size: 4KB
+        - va: "0x80410000"
+          pa: "0xD0410000"
+          size: 4KB
+          page_size: 4KB

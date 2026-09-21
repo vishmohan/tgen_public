@@ -1,0 +1,51 @@
+# RISC-V Page Table Config — multiple satp values, single stage (no hypervisor)
+#
+# Use page_tables: list to generate multiple independent page tables,
+# each with its own satp value (different base_pa and/or asid).
+#
+# Useful for tests that switch between processes or address spaces.
+
+mode: sv39   # default mode for all entries (can be overridden per entry)
+
+page_tables:
+
+  # Process 0: identity-mapped code + data
+  - label:   proc0
+    base_pa: "0x80010000"
+    asid:    0
+    mappings:
+      - va: "0x80000000"
+        pa: same
+        size: 2MB
+        page_size: 2MB
+        attrs: {r: 1, w: 0, x: 1}
+      - va: "0x80200000"
+        pa: same
+        size: 4KB
+        page_size: 4KB
+
+  # Process 1: different VA->PA mapping, different asid
+  - label:   proc1
+    base_pa: "0x80020000"
+    asid:    1
+    mappings:
+      - va: "0x80000000"
+        pa: "0x90000000"    # same VA, different PA
+        size: 2MB
+        page_size: 2MB
+        attrs: {r: 1, w: 0, x: 1}
+      - va: "0x80200000"
+        pa: "0x90200000"
+        size: 4KB
+        page_size: 4KB
+
+  # Process 2: Sv48 mode override for this entry only
+  - label:   proc2_sv48
+    base_pa: "0x80030000"
+    asid:    2
+    mode:    sv48           # overrides the top-level mode: sv39
+    mappings:
+      - va: "0x80000000"
+        pa: same
+        size: 1GB
+        page_size: 1GB

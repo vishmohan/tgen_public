@@ -1,0 +1,39 @@
+# RISC-V Page Table Config — single stage (Sv39)
+#
+# mode     : sv39 | sv48 | sv57
+# base_pa  : PA where page tables are placed (must be 4KB-aligned)
+# asid     : address space ID written into satp (default 0)
+#
+# mappings:
+#   va        : virtual address (hex or decimal)
+#   pa        : physical address, or 'same' for identity mapping
+#   size      : region size  (4KB / 2MB / 1GB / hex / decimal)
+#   page_size : leaf granularity (default 4KB)
+#   attrs     : override any of {v r w x u g a d} (default: r=1 w=1, rest=0 except v/a/d=1)
+
+mode:    sv39
+base_pa: "0x80010000"
+asid:    0
+
+mappings:
+
+  # Code: identity map, read+execute, 2MB huge page
+  - va:        "0x80000000"
+    pa:        same
+    size:      2MB
+    page_size: 2MB
+    attrs: {r: 1, w: 0, x: 1}
+
+  # Data: identity map, read+write, 4KB pages, 64KB region
+  - va:        "0x80200000"
+    pa:        same
+    size:      "0x10000"
+    page_size: 4KB
+
+  # Non-identity: remap 0xC0000000 -> 0x100000000, 1GB huge page, user-accessible
+  # Note: both VA and PA must be 1GB-aligned (multiples of 0x40000000)
+  - va:        "0xC0000000"
+    pa:        "0x100000000"
+    size:      1GB
+    page_size: 1GB
+    attrs: {r: 1, w: 1, x: 0, u: 1}

@@ -1,0 +1,44 @@
+# RISC-V Page Table Config — two-stage (H-extension)
+#
+# stage1: VS-stage  guest VA  -> GPA   (runs in VS-mode)
+# stage2: G-stage   GPA       -> HPA   (runs in HS-mode)
+#
+# Each stage is an independent PageTable instance.
+# They may use different modes (e.g. VS=sv39, G=sv48).
+
+stage1:
+  mode:    sv39
+  base_pa: "0x80400000"   # VS-stage page tables live here (GPA) — outside code region
+  asid:    0
+  mappings:
+    # Guest code: VA=GPA identity, 2MB huge page, RX
+    - va:        "0x80000000"
+      pa:        same
+      size:      2MB
+      page_size: 2MB
+      attrs: {r: 1, w: 0, x: 1}
+
+    # Guest data: VA=GPA identity, 4KB pages
+    - va:        "0x80200000"
+      pa:        same
+      size:      4KB
+      page_size: 4KB
+
+stage2:
+  mode:    sv48
+  base_pa: "0x90010000"   # G-stage page tables live here (HPA)
+  asid:    0
+  mappings:
+    # Guest code/data region: GPA 0x80000000 -> HPA 0xC0000000, 2MB pages
+    - va:        "0x80000000"
+      pa:        "0xC0000000"
+      size:      4MB
+      page_size: 2MB
+      attrs: {r: 1, w: 1, x: 1}
+
+    # VS-stage page tables: GPA 0x80400000 -> HPA 0xC0400000, 4KB
+    # Non-overlapping with the 2MB region above
+    - va:        "0x80400000"
+      pa:        "0xC0400000"
+      size:      4KB
+      page_size: 4KB
